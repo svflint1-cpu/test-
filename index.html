@@ -342,12 +342,12 @@
 </head>
 <body>
 <div class="app">
-  <div class="title">🚪 Министерство дверей</div>
+  <div class="title">🚪 Завод дверей</div>
 
   <div class="boss">
-    <div class="boss-avatar animated"><img id="bossAvatarSmall" alt="Тобишь" /></div>
+    <div class="boss-avatar animated"><img id="bossAvatarSmall" alt="Бригадир" /></div>
     <div>
-      <div class="label">Тобишь</div>
+      <div class="label">Бригадир</div>
       <div class="line" id="bossLine">Начали смену. Гони двери!</div>
     </div>
   </div>
@@ -375,11 +375,12 @@
   </div>
 
   <div class="help">
-    Собирай 3+ одинаковые двери. И не проебуй линии! 
+    Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери.
+    Процесс сохраняется автоматически: уровень, кристаллы, время, бусты и само поле.
   </div>
 
   <div class="credits">
-    Создано при помощи Чайки.
+    Один файл. Двери — SVG Repo door icons с CC0. Бригадир — OpenMoji Construction Worker, CC BY-SA 4.0.
   </div>
 </div>
 
@@ -532,11 +533,18 @@ const els = {
   overlayText: document.getElementById("overlayText"),
   goBtn: document.getElementById("goBtn"),
   bossAvatarSmall: document.getElementById("bossAvatarSmall"),
-  bossAvatarBig: document.getElementById("bossAvatarBig")
+  bossAvatarBig: document.getElementById("bossAvatarBig"),
+  gameOverOverlay: document.getElementById("gameOverOverlay"),
+  bossAvatarGameOver: document.getElementById("bossAvatarGameOver"),
+  gameOverTitle: document.getElementById("gameOverTitle"),
+  gameOverText: document.getElementById("gameOverText"),
+  gameOverStats: document.getElementById("gameOverStats"),
+  restartBtn: document.getElementById("restartBtn")
 };
 
 els.bossAvatarSmall.src = BRIGADIER_SRC;
 els.bossAvatarBig.src = BRIGADIER_SRC;
+els.bossAvatarGameOver.src = BRIGADIER_SRC;
 els.overlayTitle.textContent = TEXTS.overlay.title;
 els.overlayText.textContent = TEXTS.overlay.text;
 els.goBtn.textContent = TEXTS.overlay.button;
@@ -998,11 +1006,26 @@ function startTimer(){
       say("gameOver");
       state.isBusy = true;
       setTimeout(() => {
-        alert(`Смена закончилась.\nСобрано дверей: ${state.score}\nКристаллы: ${state.coins}`);
-        resetGame();
+        showGameOverOverlay();
       }, 150);
     }
   }, 1000);
+}
+
+
+function showGameOverOverlay(){
+  els.gameOverTitle.textContent = "Мы все проебали";
+  els.gameOverText.textContent = "Смена завалена. Вот что ты успел собрать:";
+  els.gameOverStats.innerHTML = `Собрано дверей: ${state.score}<br>Кристаллы: ${state.coins}<br>Уровень: ${state.level}`;
+  els.gameOverOverlay.classList.add("show");
+
+  const clickHandler = () => {
+    els.restartBtn.removeEventListener("click", clickHandler);
+    els.gameOverOverlay.classList.remove("show");
+    resetGame();
+  };
+
+  els.restartBtn.addEventListener("click", clickHandler);
 }
 
 function resetGame(){
@@ -1053,5 +1076,16 @@ function init(){
 
 init();
 </script>
+
+<div class="overlay" id="gameOverOverlay">
+  <div class="modal">
+    <div class="modal-avatar"><img id="bossAvatarGameOver" alt="Бригадир" /></div>
+    <h3 id="gameOverTitle">Мы все проебали</h3>
+    <p id="gameOverText">Смена завалена. Вот что ты успел собрать:</p>
+    <p id="gameOverStats" style="font-size:18px;font-weight:700;margin-top:-4px;">Собрано дверей: 0<br>Кристаллы: 0<br>Уровень: 1</p>
+    <button id="restartBtn">Начать заново</button>
+  </div>
+</div>
+
 </body>
 </html>
