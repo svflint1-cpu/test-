@@ -136,7 +136,12 @@
     <button id="buyLineBtn">🛒 Купить линию (12)</button>
     <button id="rewardBtn" class="reward-btn">🎥 +50 кристаллов за видео</button>
   </div>
-  <div class="help">Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери. Процесс сохраняется автоматически: уровень, кристаллы, время, бусты и само поле.</div>
+
+  <div class="stars-shop">
+    <button id="buy100StarsBtn">⭐ 100 кристаллов</button>
+    <button id="buy500StarsBtn">⭐ 500 кристаллов</button>
+  </div>
+  <div class="help">Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери. Процесс сохраняется автоматически: уровень, кристаллы, время, бусты и само поле. Telegram Stars заработают после подстановки готовых invoice-ссылок от твоего бота.</div>
   <div class="credits">Один файл. Двери — SVG Repo door icons с CC0. Бригадир — OpenMoji Construction Worker, CC BY-SA 4.0.</div>
 
   <div class="help" style="margin-top:12px">
@@ -203,7 +208,7 @@ const els={
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
   gameOverOverlay:document.getElementById("gameOverOverlay"), bossAvatarGameOver:document.getElementById("bossAvatarGameOver"),
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
-  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode")
+  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode"), rewardBtn:document.getElementById("rewardBtn"), buy100StarsBtn:document.getElementById("buy100StarsBtn"), buy500StarsBtn:document.getElementById("buy500StarsBtn")
 };
 els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
@@ -228,6 +233,11 @@ const FIREBASE_CONFIG = {
 
 let onlineDb = null;
 let leaderboardMode = "local";
+
+const STARS_INVOICE_URLS = {
+  pack100: "PASTE_TELEGRAM_INVOICE_LINK_FOR_100",
+  pack500: "PASTE_TELEGRAM_INVOICE_LINK_FOR_500"
+};
 
 
 function playTone(freq=440, duration=0.12, type="triangle", volume=0.03, sweepTo=null){
@@ -446,6 +456,62 @@ async function watchRewardedAd(){
   }
 }
 
+
+async function watchRewardedAd(){
+  if(state.isBusy) return;
+  try{
+    if(typeof window.showDoorRewardedAd === "function"){
+      const rewarded = await window.showDoorRewardedAd();
+      if(rewarded){
+        state.coins += REWARDED_COINS;
+        els.boss.textContent = `Бригадир: Забрал +${REWARDED_COINS} кристаллов. Работай дальше.`;
+        renderBoard();
+        return;
+      }
+      els.boss.textContent = "Бригадир: Видео не досмотрел — награды нет.";
+      return;
+    }
+    els.boss.textContent = "Бригадир: Для видеонаграды нужен рекламный SDK.";
+    alert("Кнопка готова под rewarded-рекламу. Когда подключишь рекламного провайдера, функция window.showDoorRewardedAd() должна вернуть true после досмотра — и игра выдаст +50 кристаллов.");
+  }catch(e){
+    console.error("Rewarded ad hook failed:", e);
+    els.boss.textContent = "Бригадир: С рекламой что-то пошло не так.";
+  }
+}
+
+function openStarsInvoice(packKey, coinsAmount){
+  if(!window.Telegram?.WebApp){
+    alert("Открой игру внутри Telegram, чтобы оплатить Stars.");
+    return;
+  }
+
+  const url = STARS_INVOICE_URLS[packKey];
+  if(!url || url.startsWith("PASTE_TELEGRAM_INVOICE_LINK")){
+    alert("Сначала вставь invoice-ссылку от бота в STARS_INVOICE_URLS.");
+    return;
+  }
+
+  try{
+    Telegram.WebApp.openInvoice(url, function(status){
+      if(status === "paid"){
+        state.coins += coinsAmount;
+        els.boss.textContent = `Бригадир: Оплата прошла. Держи +${coinsAmount} кристаллов.`;
+        renderBoard();
+      } else if(status === "cancelled"){
+        els.boss.textContent = "Бригадир: Передумал платить — ладно.";
+      } else if(status === "failed"){
+        els.boss.textContent = "Бригадир: Платёж не прошёл.";
+      } else {
+        els.boss.textContent = `Бригадир: Статус оплаты: ${status}`;
+      }
+    });
+  }catch(e){
+    console.error("Stars invoice open failed:", e);
+    alert("Не удалось открыть оплату. Проверь invoice-ссылку и запуск внутри Telegram.");
+  }
+}
+
+
 function saveGame(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     board:state.board, selected:state.selected, score:state.score, level:state.level, target:state.target,
@@ -598,7 +664,7 @@ async function init(){
   say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard(); startTimer();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
-  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
+  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd; els.buy100StarsBtn.onclick=()=>openStarsInvoice("pack100",100); els.buy500StarsBtn.onclick=()=>openStarsInvoice("pack500",500); els.rewardBtn.onclick=watchRewardedAd;
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
 init();
