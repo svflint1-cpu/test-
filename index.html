@@ -577,7 +577,11 @@ function renderBoard(matched=new Set()){
     const tile=tileById(id); const inner=document.createElement("div"); inner.className="tile-inner"; inner.style.setProperty("--c1",tile.c1); inner.style.setProperty("--c2",tile.c2);
     const img=document.createElement("img"); img.src=tile.src; img.alt=id; inner.appendChild(img); cell.appendChild(inner); cell.onclick=()=>onCellClick(i); els.grid.appendChild(cell);
   });
-  els.level.textContent=state.level; els.score.textContent=`${state.score}/${state.target}`; els.time.textContent=state.time; els.coins.textContent=state.coins;
+  const levelStart = state.level === 1 ? 0 : 35 + (state.level - 2) * 20;
+  const levelGoal = state.level === 1 ? 35 : 20;
+  const levelProgress = Math.max(0, state.score - levelStart);
+  const shownScore = Math.min(levelProgress, levelGoal);
+  els.level.textContent=state.level; els.score.textContent=`${shownScore}/${levelGoal}`; els.time.textContent=state.time; els.coins.textContent=state.coins;
   els.bombBtn.textContent=`💣 Бомба (${state.bombs})`; els.lineBtn.textContent=`⚡ Линия (${state.lines})`;
   els.buyBombBtn.textContent=`🛒 Купить бомбу (${BOMB_COST})`; els.buyLineBtn.textContent=`🛒 Купить линию (${LINE_COST})`;
   saveGame();
