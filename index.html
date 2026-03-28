@@ -266,11 +266,11 @@
 </div>
 
 <script>
-const STORAGE_KEY="door_factory_save_v4", SIZE=6, TARGET_START=35, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
+const STORAGE_KEY="door_factory_save_v5", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
 function getTargetForLevel(level){
   let total = 15;
-  for(let i=2;i<=level;i++){
-    total += (14 + i); // +15, +16, +17...
+  for(let i = 2; i <= level; i++){
+    total += (14 + i); // +16, +17, +18... to totals: 15, 31, 48, 66...
   }
   return total;
 }
@@ -646,8 +646,8 @@ async function resolveBoard(){
 }
 function showLevelOverlay(){
   return new Promise(resolve=>{
-    state.isBusy=true; els.overlay.classList.add("show");
-    const clickHandler=()=>{ els.goBtn.removeEventListener("click",clickHandler); els.overlay.classList.remove("show"); state.level+=1; state.target+=15; state.time=TIME_START; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); renderBoard(); say("start"); state.isBusy=false; startTimer(); resolve(); };
+    state.isBusy=true; els.overlayTitle.textContent="Молодец!"; els.overlayText.textContent=`Следующий уровень: ${state.level + 1}. Нужно добраться до ${getTargetForLevel(state.level + 1)} дверей.`; els.overlay.classList.add("show");
+    const clickHandler=()=>{ els.goBtn.removeEventListener("click",clickHandler); els.overlay.classList.remove("show"); state.level+=1; state.target=getTargetForLevel(state.level); state.time=TIME_START; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); renderBoard(); say("start"); state.isBusy=false; startTimer(); resolve(); };
     els.goBtn.addEventListener("click", clickHandler);
   });
 }
@@ -698,7 +698,7 @@ function showGameOverOverlay(){
   els.restartBtn.addEventListener("click", clickHandler);
 }
 function resetGame(){
-  localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=TARGET_START; state.time=TIME_START; state.coins=0; state.bombs=1; state.lines=1; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
+  localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.bombs=1; state.lines=1; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -711,7 +711,13 @@ function startFromIntro(){
 }
 
 async function init(){
-  if(!loadGame()) state.board=createRandomBoard();
+  if(!loadGame()){
+    state.score=0;
+    state.level=1;
+    state.target=getTargetForLevel(1);
+    state.time=TIME_START;
+    state.board=createRandomBoard();
+  }
   say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
