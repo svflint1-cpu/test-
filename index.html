@@ -120,8 +120,8 @@
     z-index:60;
     padding:14px;
   }
-  .intro-overlay.show{display:flex}
-  .intro-modal{
+  .intro-overlay.show{display:flex;pointer-events:auto}
+  .intro-modal{position:relative;z-index:81;
     width:min(100%,460px);
     background:linear-gradient(180deg,#5d3f2a,#2b1c13);
     border:2px solid #a97852;
@@ -177,7 +177,7 @@
     font-size:16px;
   }
   .intro-rules b{color:#ffd07a}
-  .intro-btn{
+  .intro-btn{position:relative;z-index:80;pointer-events:auto;
     width:100%;
     background:linear-gradient(180deg,#ffb64a,#df7f1a);
     padding:14px 20px;
@@ -243,7 +243,7 @@
       Чем больше серий — тем больше дверей и кристаллов ты заберёшь.<br>
       Твоя задача — <b>собрать как можно больше дверей</b> и не завалить смену.
     </div>
-    <button class="intro-btn" id="introStartBtn">Понял, погнали</button>
+    <button class="intro-btn" id="introStartBtn" type="button" onclick="startFromIntro()">Понял, погнали</button>
   </div>
 </div>
 
@@ -694,13 +694,16 @@ function resetGame(){
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 function startFromIntro(){
-  els.introOverlay.classList.remove("show");
+  const overlay = document.getElementById("introOverlay");
+  if(overlay) overlay.classList.remove("show");
+  state.isBusy = false;
   say("start");
   renderBoard();
   startTimer();
 }
 
 async function init(){
+  setTimeout(()=>{const el=document.getElementById("bossAvatarIntro"); if(el) el.src=BRIGADIER_SRC;},100);
   if(!loadGame()) state.board=createRandomBoard();
   say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
@@ -709,6 +712,12 @@ async function init(){
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
 init();
+document.addEventListener("DOMContentLoaded", ()=>{
+  const btn = document.getElementById("introStartBtn");
+  if(btn) btn.onclick = startFromIntro;
+  const introAvatar = document.getElementById("bossAvatarIntro");
+  if(introAvatar) introAvatar.src = BRIGADIER_SRC;
+});
 </script>
 </body>
 </html>
