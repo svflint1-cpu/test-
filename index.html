@@ -117,7 +117,7 @@
     align-items:center;
     justify-content:center;
     background:rgba(0,0,0,.82);
-    z-index:90;
+    z-index:9999;
     padding:14px;
   }
   .intro-overlay.show{display:flex}
@@ -242,7 +242,7 @@
       Чем больше серий — тем больше дверей и кристаллов заберёшь.<br>
       Твоя задача — <b>набрать как можно больше дверей</b> и не завалить смену.
     </div>
-    <button class="intro-btn" id="introStartBtn" type="button">Понял, погнали</button>
+    <button class="intro-btn" id="introStartBtn" type="button" onclick="startFromIntro()">Понял, погнали</button>
   </div>
 </div>
 
@@ -303,7 +303,7 @@ const els={
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
   gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode")
 };
-els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; if(els.bossAvatarIntro) els.bossAvatarIntro.src=BRIGADIER_SRC;
+els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; const __introAvatar=document.getElementById("bossAvatarIntro"); if(__introAvatar) __introAvatar.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
 
 const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
@@ -691,8 +691,10 @@ function resetGame(){
   localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=TARGET_START; state.time=TIME_START; state.coins=0; state.bombs=1; state.lines=1; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
 function startFromIntro(){
-  if(els.introOverlay) els.introOverlay.classList.remove("show");
+  const overlay = document.getElementById("introOverlay");
+  if(overlay) overlay.classList.remove("show");
   say("start");
   renderBoard();
   startTimer();
@@ -700,18 +702,16 @@ function startFromIntro(){
 
 async function init(){
   if(!loadGame()) state.board=createRandomBoard();
-  say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard(); if(els.introOverlay) els.introOverlay.classList.add("show");
+  say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
-  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd; if(els.introStartBtn) els.introStartBtn.onclick=startFromIntro;
+  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
 init();
 document.addEventListener("DOMContentLoaded", ()=>{
   const a = document.getElementById("bossAvatarIntro");
   if(a) a.src = BRIGADIER_SRC;
-  const b = document.getElementById("introStartBtn");
-  if(b) b.onclick = startFromIntro;
 });
 </script>
 </body>
