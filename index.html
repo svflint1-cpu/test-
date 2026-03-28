@@ -70,6 +70,16 @@
     height:100%;
     object-fit:contain;
   }
+  .boss-avatar.animated{
+    animation:bob 1.8s ease-in-out infinite;
+    transform-origin:center bottom;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    25%{ transform:translateY(-3px) rotate(-2deg); }
+    50%{ transform:translateY(-5px) rotate(0deg); }
+    75%{ transform:translateY(-2px) rotate(2deg); }
+  }
   .boss .label{
     color:#ffc36e;
     font-weight:800;
@@ -186,6 +196,40 @@
     from{transform:translate(0,0) scale(1); opacity:1}
     to{transform:translate(var(--dx), var(--dy)) scale(.2); opacity:0}
   }
+  .blast{
+    position:absolute;
+    width:74px;
+    height:74px;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,225,120,.85) 18%, rgba(255,132,48,.62) 45%, rgba(255,90,48,0) 72%);
+    transform:translate(-50%,-50%) scale(.15);
+    animation:blast .48s ease-out forwards;
+    z-index:14;
+  }
+  @keyframes blast{
+    0%{opacity:1; transform:translate(-50%,-50%) scale(.15)}
+    60%{opacity:1; transform:translate(-50%,-50%) scale(1.15)}
+    100%{opacity:0; transform:translate(-50%,-50%) scale(1.5)}
+  }
+  .line-flash{
+    position:absolute;
+    left:0;
+    right:0;
+    height:72px;
+    border-radius:18px;
+    pointer-events:none;
+    background:linear-gradient(90deg, rgba(80,170,255,0), rgba(140,220,255,.95), rgba(80,170,255,0));
+    box-shadow:0 0 18px rgba(100,200,255,.9);
+    animation:lineFlash .48s ease-out forwards;
+    z-index:13;
+  }
+  @keyframes lineFlash{
+    0%{opacity:0; transform:translateX(-18px)}
+    30%{opacity:1}
+    100%{opacity:0; transform:translateX(18px)}
+  }
   .controls{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -204,6 +248,15 @@
   .btn-bomb{background:linear-gradient(180deg,#e55f5f,#b82f2f)}
   .btn-line{background:linear-gradient(180deg,#57a0ff,#2b62d9)}
   .btn-time{background:linear-gradient(180deg,#ffb64a,#df7f1a)}
+  .shop{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-top:8px;
+  }
+  .shop button{
+    background:linear-gradient(180deg,#8d61e9,#5b34a8);
+  }
   .help{
     background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.08);
@@ -238,6 +291,11 @@
     box-shadow:0 18px 40px rgba(0,0,0,.45);
     padding:20px 18px;
     text-align:center;
+    animation:modalIn .35s ease-out;
+  }
+  @keyframes modalIn{
+    0%{opacity:0; transform:translateY(10px) scale(.92)}
+    100%{opacity:1; transform:translateY(0) scale(1)}
   }
   .modal-avatar{
     width:96px;
@@ -248,6 +306,7 @@
     overflow:hidden;
     border:3px solid rgba(255,255,255,.25);
     box-shadow:0 10px 18px rgba(0,0,0,.28);
+    animation:bob 1.8s ease-in-out infinite;
   }
   .modal-avatar img{
     width:100%;
@@ -286,7 +345,7 @@
   <div class="title">🚪 Завод дверей</div>
 
   <div class="boss">
-    <div class="boss-avatar"><img id="bossAvatarSmall" alt="Бригадир" /></div>
+    <div class="boss-avatar animated"><img id="bossAvatarSmall" alt="Бригадир" /></div>
     <div>
       <div class="label">Бригадир</div>
       <div class="line" id="bossLine">Начали смену. Гони двери!</div>
@@ -310,14 +369,18 @@
     <button class="btn-time" id="timeBtn">⏱ +20 сек (8)</button>
   </div>
 
+  <div class="shop">
+    <button id="buyBombBtn">🛒 Купить бомбу (10)</button>
+    <button id="buyLineBtn">🛒 Купить линию (12)</button>
+  </div>
+
   <div class="help">
     Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери.
-    После уровня бригадир выйдет на экран и запустит следующую смену кнопкой «Погнали».
+    Процесс сохраняется автоматически: уровень, кристаллы, время, бусты и само поле.
   </div>
 
   <div class="credits">
-    Один файл. Все картинки дверей — дверные SVG с SVG Repo, где у выбранных иконок указана лицензия CC0.
-    Аватар бригадира — Construction Worker от OpenMoji под CC BY-SA 4.0.
+    Один файл. Двери — SVG Repo door icons с CC0. Бригадир — OpenMoji Construction Worker, CC BY-SA 4.0.
   </div>
 </div>
 
@@ -332,8 +395,8 @@
 
 <script>
 /*
-  Asset notes:
-  - SVG Repo pages below show the selected door icons as CC0:
+  Assets:
+  - SVG Repo CC0 door icons:
     https://www.svgrepo.com/svg/322203/door
     https://www.svgrepo.com/svg/456026/double-doors
     https://www.svgrepo.com/svg/151987/opened-door-aperture
@@ -341,13 +404,16 @@
     https://www.svgrepo.com/svg/142359/double-door-closed
     https://www.svgrepo.com/svg/494749/door-exit
   - Brigadier avatar:
-    OpenMoji construction worker page with CC BY-SA 4.0:
     https://openmoji.org/library/emoji-1F477/
 */
 
+const STORAGE_KEY = "door_factory_save_v2";
 const SIZE = 6;
 const TARGET_START = 35;
 const TIME_START = 60;
+const BOMB_COST = 10;
+const LINE_COST = 12;
+const TIME_COST = 8;
 const BRIGADIER_SRC = "https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F477.svg";
 
 const TILE_TYPES = [
@@ -407,6 +473,21 @@ const TEXTS = {
       "Сметай линию, не жалей.",
       "Один ряд под нож."
     ],
+    buyBomb: [
+      "Бомбу купил. Только не промахнись.",
+      "Ладно, держи бомбу.",
+      "Новая бомба на складе."
+    ],
+    buyLine: [
+      "Линию закупили. Пользуйся с умом.",
+      "Есть ещё один линейный заряд.",
+      "Держи линию, но без дичи."
+    ],
+    noCoins: [
+      "Кристаллов не хватает.",
+      "Ты ещё не нафармил на это.",
+      "Сначала заработай кристаллы."
+    ],
     gameOver: [
       "Смена провалена. Ноль премии.",
       "План завален. Позорище.",
@@ -445,6 +526,8 @@ const els = {
   bombBtn: document.getElementById("bombBtn"),
   lineBtn: document.getElementById("lineBtn"),
   timeBtn: document.getElementById("timeBtn"),
+  buyBombBtn: document.getElementById("buyBombBtn"),
+  buyLineBtn: document.getElementById("buyLineBtn"),
   overlay: document.getElementById("levelOverlay"),
   overlayTitle: document.getElementById("overlayTitle"),
   overlayText: document.getElementById("overlayText"),
@@ -469,6 +552,44 @@ function xy(i){ return { x: i % SIZE, y: Math.floor(i / SIZE) }; }
 function inBounds(x,y){ return x >= 0 && x < SIZE && y >= 0 && y < SIZE; }
 function randomType(){ return TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)].id; }
 function tileById(id){ return TILE_TYPES.find(t => t.id === id); }
+
+function saveGame(){
+  const payload = {
+    board: state.board,
+    selected: state.selected,
+    score: state.score,
+    level: state.level,
+    target: state.target,
+    time: state.time,
+    coins: state.coins,
+    bombs: state.bombs,
+    lines: state.lines,
+    lastLowTimeMark: state.lastLowTimeMark
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadGame(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data.board) || data.board.length !== SIZE * SIZE) return false;
+    state.board = data.board;
+    state.selected = typeof data.selected === "number" ? data.selected : null;
+    state.score = Number(data.score) || 0;
+    state.level = Number(data.level) || 1;
+    state.target = Number(data.target) || TARGET_START;
+    state.time = Math.max(1, Number(data.time) || TIME_START);
+    state.coins = Number(data.coins) || 0;
+    state.bombs = Number(data.bombs) || 0;
+    state.lines = Number(data.lines) || 0;
+    state.lastLowTimeMark = !!data.lastLowTimeMark;
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function createRandomBoard() {
   let board;
@@ -523,6 +644,10 @@ function renderBoard(matched = new Set()){
   els.coins.textContent = state.coins;
   els.bombBtn.textContent = `💣 Бомба (${state.bombs})`;
   els.lineBtn.textContent = `⚡ Линия (${state.lines})`;
+  els.buyBombBtn.textContent = `🛒 Купить бомбу (${BOMB_COST})`;
+  els.buyLineBtn.textContent = `🛒 Купить линию (${LINE_COST})`;
+
+  saveGame();
 }
 
 function areAdjacent(a,b){
@@ -639,6 +764,38 @@ function createSparkles(index){
     wrap.appendChild(s);
     setTimeout(() => s.remove(), 600);
   }
+}
+
+function showBlast(indices){
+  const wrap = document.querySelector(".board-wrap");
+  const tile = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile"));
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap"));
+
+  const xs = indices.map(i => xy(i).x);
+  const ys = indices.map(i => xy(i).y);
+  const cx = ((Math.min(...xs) + Math.max(...xs)) / 2) * (tile + gap) + tile / 2;
+  const cy = ((Math.min(...ys) + Math.max(...ys)) / 2) * (tile + gap) + tile / 2;
+
+  const blast = document.createElement("div");
+  blast.className = "blast";
+  blast.style.left = cx + "px";
+  blast.style.top = cy + "px";
+  wrap.appendChild(blast);
+  setTimeout(() => blast.remove(), 520);
+}
+
+function showLineFlash(row){
+  const wrap = document.querySelector(".board-wrap");
+  const tile = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile"));
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap"));
+  const top = row * (tile + gap);
+
+  const flash = document.createElement("div");
+  flash.className = "line-flash";
+  flash.style.top = top + "px";
+  flash.style.height = tile + "px";
+  wrap.appendChild(flash);
+  setTimeout(() => flash.remove(), 520);
 }
 
 async function resolveBoard(){
@@ -761,7 +918,7 @@ function bombAt(center){
       if (inBounds(nx, ny)) affected.push(idx(nx, ny));
     }
   }
-  performDirectRemove(affected);
+  performDirectRemove(affected, "bomb");
 }
 
 function lineClearRow(row){
@@ -770,20 +927,24 @@ function lineClearRow(row){
   say("useLine");
   const affected = [];
   for (let x = 0; x < SIZE; x++) affected.push(idx(x,row));
-  performDirectRemove(affected);
+  performDirectRemove(affected, "line", row);
 }
 
-async function performDirectRemove(indices){
+async function performDirectRemove(indices, type, row = 0){
   state.isBusy = true;
   const matched = new Set(indices);
   renderBoard(matched);
   matched.forEach(i => createSparkles(i));
-  await wait(320);
+
+  if (type === "bomb") showBlast(indices);
+  if (type === "line") showLineFlash(row);
+
+  await wait(340);
   indices.forEach(i => state.board[i] = null);
   applyGravity(state.board);
   state.score += indices.length;
   renderBoard();
-  await wait(120);
+  await wait(140);
   await resolveBoard();
   state.isBusy = false;
   renderBoard();
@@ -791,12 +952,36 @@ async function performDirectRemove(indices){
 
 function buyTime(){
   if (state.isBusy) return;
-  if (state.coins < 8) {
-    els.boss.textContent = "Не хватает кристаллов на время.";
+  if (state.coins < TIME_COST) {
+    say("noCoins");
     return;
   }
-  state.coins -= 8;
+  state.coins -= TIME_COST;
   state.time += 20;
+  renderBoard();
+}
+
+function buyBomb(){
+  if (state.isBusy) return;
+  if (state.coins < BOMB_COST) {
+    say("noCoins");
+    return;
+  }
+  state.coins -= BOMB_COST;
+  state.bombs += 1;
+  say("buyBomb");
+  renderBoard();
+}
+
+function buyLine(){
+  if (state.isBusy) return;
+  if (state.coins < LINE_COST) {
+    say("noCoins");
+    return;
+  }
+  state.coins -= LINE_COST;
+  state.lines += 1;
+  say("buyLine");
   renderBoard();
 }
 
@@ -815,29 +1000,36 @@ function startTimer(){
       state.isBusy = true;
       setTimeout(() => {
         alert(`Смена закончилась.\nСобрано дверей: ${state.score}\nКристаллы: ${state.coins}`);
-        state.score = 0;
-        state.level = 1;
-        state.target = TARGET_START;
-        state.time = TIME_START;
-        state.coins = 0;
-        state.bombs = 1;
-        state.lines = 1;
-        state.isBusy = false;
-        state.lastLowTimeMark = false;
-        state.selected = null;
-        state.board = createRandomBoard();
-        say("start");
-        renderBoard();
-        startTimer();
+        resetGame();
       }, 150);
     }
   }, 1000);
 }
 
+function resetGame(){
+  localStorage.removeItem(STORAGE_KEY);
+  state.score = 0;
+  state.level = 1;
+  state.target = TARGET_START;
+  state.time = TIME_START;
+  state.coins = 0;
+  state.bombs = 1;
+  state.lines = 1;
+  state.isBusy = false;
+  state.lastLowTimeMark = false;
+  state.selected = null;
+  state.board = createRandomBoard();
+  say("start");
+  renderBoard();
+  startTimer();
+}
+
 function wait(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function init(){
-  state.board = createRandomBoard();
+  if (!loadGame()) {
+    state.board = createRandomBoard();
+  }
   say("start");
   renderBoard();
   startTimer();
@@ -852,6 +1044,8 @@ function init(){
     lineClearRow(row);
   });
   els.timeBtn.addEventListener("click", buyTime);
+  els.buyBombBtn.addEventListener("click", buyBomb);
+  els.buyLineBtn.addEventListener("click", buyLine);
 
   if (window.Telegram?.WebApp) {
     try { Telegram.WebApp.ready(); } catch {}
