@@ -1,175 +1,771 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Door Factory PRO</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Door Factory Match-3</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body {
-  margin:0;
-  background:linear-gradient(#1a1a1a,#000);
-  color:white;
-  font-family:Arial;
-  text-align:center;
-}
-
-.topbar {
-  background:#222;
-  padding:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.5);
-}
-
-.boss {
-  background:#2b2b2b;
-  padding:10px;
-  border-radius:10px;
-  margin:10px;
-  color:#ffb347;
-  font-weight:bold;
-  box-shadow:0 0 10px orange;
-}
-
-.panel {
-  display:flex;
-  justify-content:space-around;
-  background:#111;
-  padding:10px;
-  margin:10px;
-  border-radius:10px;
-  box-shadow:inset 0 0 10px #000;
-}
-
-.grid {
-  display:grid;
-  grid-template-columns:repeat(6,60px);
-  gap:8px;
-  justify-content:center;
-}
-
-.cell {
-  width:60px;
-  height:60px;
-  border-radius:12px;
-  background:linear-gradient(145deg,#5a3d1a,#2e1c0c);
-  box-shadow:0 5px 10px rgba(0,0,0,0.8);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.cell:hover {
-  transform:scale(1.1);
-}
-
-.selected {
-  outline:3px solid gold;
-}
-
-.match {
-  animation:pop 0.3s;
-}
-
-@keyframes pop {
-  50%{transform:scale(1.3)}
-  100%{transform:scale(0);opacity:0}
-}
-
-.buttons button {
-  margin:5px;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 3px 8px black;
-}
-
-.bomb {background:#c0392b;}
-.line {background:#f1c40f;}
-.time {background:#3498db;}
-.bonus {background:#2ecc71;}
-.donate {background:#e67e22;}
-
-.leaderboard {
-  margin-top:10px;
-}
+  :root{
+    --bg1:#1b120d;
+    --bg2:#0d0907;
+    --panel:#2b1d14;
+    --panel2:#3b291c;
+    --gold:#ffcc66;
+    --text:#fff6e9;
+    --accent:#ff8b3d;
+    --danger:#ff5959;
+    --ok:#55d18a;
+    --tile:72px;
+    --gap:8px;
+    --board-w: calc(var(--tile) * 6 + var(--gap) * 5);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    color:var(--text);
+    font-family:Arial, Helvetica, sans-serif;
+    background:
+      radial-gradient(circle at top, #4b2f20 0%, #1a120e 35%, #0a0705 100%);
+    display:flex;
+    justify-content:center;
+    padding:14px;
+  }
+  .app{
+    width:min(100%, 470px);
+  }
+  .title{
+    text-align:center;
+    font-size:28px;
+    font-weight:900;
+    margin:4px 0 10px;
+    text-shadow:0 2px 0 #000, 0 0 14px rgba(255,170,80,.4);
+  }
+  .boss{
+    background:linear-gradient(180deg, #533722, #312015);
+    border:2px solid #8d613f;
+    border-radius:18px;
+    padding:10px 14px;
+    min-height:66px;
+    box-shadow:0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
+    margin-bottom:10px;
+  }
+  .boss .label{
+    color:#ffc36e;
+    font-weight:800;
+    margin-bottom:4px;
+    font-size:14px;
+  }
+  .boss .line{
+    font-size:16px;
+    line-height:1.25;
+    min-height:20px;
+  }
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .stat{
+    background:linear-gradient(180deg, var(--panel2), var(--panel));
+    border:1px solid #75513a;
+    border-radius:14px;
+    padding:8px 6px;
+    text-align:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .stat .k{
+    color:#cfa98b;
+    font-size:12px;
+    margin-bottom:3px;
+  }
+  .stat .v{
+    font-weight:800;
+    font-size:18px;
+  }
+  .board-wrap{
+    position:relative;
+    width:var(--board-w);
+    margin:0 auto;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(6,var(--tile));
+    gap:var(--gap);
+    position:relative;
+    user-select:none;
+    touch-action:manipulation;
+  }
+  .cell{
+    width:var(--tile);
+    height:var(--tile);
+    border-radius:18px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 25%),
+      linear-gradient(180deg, #6a4631, #372319);
+    border:2px solid rgba(255,220,180,.15);
+    box-shadow:
+      0 8px 16px rgba(0,0,0,.35),
+      inset 0 1px 0 rgba(255,255,255,.08),
+      inset 0 -4px 8px rgba(0,0,0,.25);
+    position:relative;
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .cell:hover{ transform:translateY(-1px); }
+  .cell.selected{
+    outline:3px solid var(--gold);
+    box-shadow:0 0 0 4px rgba(255,204,102,.18), 0 10px 18px rgba(0,0,0,.4);
+  }
+  .cell.shuffling{
+    animation:shake .35s ease;
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    50%{transform:translateX(4px)}
+    75%{transform:translateX(-3px)}
+  }
+  .tile-img{
+    position:absolute;
+    inset:8px;
+    border-radius:12px;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .cell.matched .tile-img{
+    animation:collect .32s ease forwards;
+  }
+  @keyframes collect{
+    0%{transform:scale(1); opacity:1; filter:brightness(1)}
+    35%{transform:scale(1.15); opacity:1; filter:brightness(1.3)}
+    100%{transform:scale(.2); opacity:0; filter:brightness(2)}
+  }
+  .spark{
+    position:absolute;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:radial-gradient(circle, #fff7b3 0%, #ffc14d 40%, rgba(255,160,40,0) 70%);
+    pointer-events:none;
+    animation:fly .55s ease-out forwards;
+    z-index:5;
+  }
+  @keyframes fly{
+    from{transform:translate(0,0) scale(1); opacity:1}
+    to{transform:translate(var(--dx), var(--dy)) scale(.2); opacity:0}
+  }
+  .controls{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin:12px 0 8px;
+  }
+  button{
+    border:none;
+    border-radius:14px;
+    padding:12px 8px;
+    color:white;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 8px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .btn-bomb{background:linear-gradient(180deg,#e55f5f,#b82f2f)}
+  .btn-line{background:linear-gradient(180deg,#57a0ff,#2b62d9)}
+  .btn-time{background:linear-gradient(180deg,#ffb64a,#df7f1a)}
+  .help{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:10px 12px;
+    line-height:1.35;
+    margin-top:10px;
+    font-size:14px;
+  }
+  .credits{
+    opacity:.8;
+    font-size:12px;
+    margin-top:10px;
+    line-height:1.35;
+  }
+  @media (max-width:520px){
+    :root{
+      --tile: calc((100vw - 28px - 5 * 8px) / 6);
+      --board-w: calc(var(--tile) * 6 + var(--gap) * 5);
+    }
+    .title{font-size:24px}
+    .boss .line{font-size:15px}
+    .stat .v{font-size:16px}
+  }
 </style>
 </head>
-
 <body>
+<div class="app">
+  <div class="title">🚪 Завод дверей</div>
 
-<div class="topbar">
-  <h2>🚪 Завод дверей</h2>
+  <div class="boss">
+    <div class="label">Бригадир</div>
+    <div class="line" id="bossLine">Начали смену. Гони двери!</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">Уровень</div><div class="v" id="levelValue">1</div></div>
+    <div class="stat"><div class="k">Собрано</div><div class="v" id="scoreValue">0/35</div></div>
+    <div class="stat"><div class="k">Время</div><div class="v" id="timeValue">60</div></div>
+    <div class="stat"><div class="k">Кристаллы</div><div class="v" id="coinsValue">0</div></div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-bomb" id="bombBtn">💣 Бомба (1)</button>
+    <button class="btn-line" id="lineBtn">⚡ Линия (1)</button>
+    <button class="btn-time" id="timeBtn">⏱ +20 сек (8)</button>
+  </div>
+
+  <div class="help">
+    Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери.
+    Источники картинок — открытые файлы Wikimedia Commons и CC0-иконки SVG Repo; ссылки вынесены в код в блок <code>SOURCES</code>.
+  </div>
+
+  <div class="credits">
+    Один файл. Можно открыть локально как <code>index.html</code> или залить на хостинг.
+  </div>
 </div>
-
-<div class="boss" id="boss">Бригадир: Начали смену!</div>
-
-<div class="panel">
-  <div id="level">Уровень: 1</div>
-  <div id="score">0</div>
-  <div id="timer">60</div>
-</div>
-
-<div class="grid" id="grid"></div>
-
-<div class="buttons">
-  <button class="bomb" onclick="useBomb()">💣 Бомба</button>
-  <button class="line" onclick="useLine()">⚡ Линия</button>
-  <button class="time" onclick="time+=20">⏱ +20</button>
-  <button class="bonus" onclick="coins+=20">🎁</button>
-  <button class="donate" onclick="alert('донат')">💰</button>
-</div>
-
-<div class="leaderboard" id="leaderboard"></div>
 
 <script>
-const width=6;
-const doors=["🚪","🚪","🚪","🚪","🚪"];
-let board=[],selected=null;
-let score=0,level=1,time=60;
+/*
+  SOURCES / LICENSES
+  - Wikimedia Commons reusable files:
+    https://commons.wikimedia.org/wiki/File:Red_Door.jpg
+    https://commons.wikimedia.org/wiki/File:Blue_Door.jpg
+    https://commons.wikimedia.org/wiki/File:Old_door.jpg
+    https://commons.wikimedia.org/wiki/File:Wooden_Door.JPG
+  - SVG Repo CC0 icon pages:
+    https://www.svgrepo.com/svg/77257/door-design
+    https://www.svgrepo.com/svg/151987/opened-door-aperture
+    https://www.svgrepo.com/svg/494749/door-exit
+    https://www.svgrepo.com/svg/4437/house-door-key
 
-function rand(){return doors[Math.floor(Math.random()*doors.length)];}
-function createBoard(){board=Array(36).fill().map(rand);}
+  For a single-file game we use direct image URLs from those open sources.
+*/
 
-function draw(){
- let g=document.getElementById("grid");
- g.innerHTML="";
- board.forEach((d,i)=>{
-  let div=document.createElement("div");
-  div.className="cell";
-  if(selected===i) div.classList.add("selected");
-  div.innerText=d;
-  div.onclick=()=>click(i);
-  g.appendChild(div);
- });
- document.getElementById("score").innerText="Собрано: "+score;
- document.getElementById("timer").innerText="Время: "+time;
+const SIZE = 6;
+const TARGET_START = 35;
+const TIME_START = 60;
+
+const TILE_TYPES = [
+  {
+    id: "redDoor",
+    name: "Красная дверь",
+    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Red%20Door.jpg?width=256"
+  },
+  {
+    id: "blueDoor",
+    name: "Синяя дверь",
+    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20Door.jpg?width=256"
+  },
+  {
+    id: "oldDoor",
+    name: "Старая дверь",
+    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Old%20door.jpg?width=256"
+  },
+  {
+    id: "woodDoor",
+    name: "Деревянная дверь",
+    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Wooden%20Door.JPG?width=256"
+  },
+  {
+    id: "iconDoor",
+    name: "Иконка двери",
+    src: "https://www.svgrepo.com/show/77257/door-design.svg"
+  },
+  {
+    id: "iconExit",
+    name: "Выход",
+    src: "https://www.svgrepo.com/show/494749/door-exit.svg"
+  }
+];
+
+const TEXTS = {
+  boss: {
+    start: [
+      "Начали смену. Гони двери!",
+      "План сам себя не сделает.",
+      "Сегодня без брака, понял?"
+    ],
+    select: [
+      "Думай, куда переставляешь.",
+      "Смотри в оба, там комбо рядом.",
+      "Не тыкай вслепую, собирай с умом."
+    ],
+    invalid: [
+      "Такой ход в брак. Давай нормально.",
+      "Пустая перестановка. Назад.",
+      "Это что было? Ничего не собрал."
+    ],
+    match: [
+      "Во, пошли двери!",
+      "Нормально. Конвейер ожил.",
+      "Так, уже лучше.",
+      "Красиво собрал."
+    ],
+    bigMatch: [
+      "Жирно! Вот это серия!",
+      "Вообще красавчик, так и жми.",
+      "Вот это уже заводская работа."
+    ],
+    shuffle: [
+      "Ходов нет. Перемешиваем склад.",
+      "Застой в цеху. Сейчас раскидаем двери заново.",
+      "Поле умерло. Делаю перестановку."
+    ],
+    levelUp: [
+      "План закрыл. Переходим дальше.",
+      "Уровень сделал. Теперь будет сложнее.",
+      "Неплохо. Следующая смена жёстче."
+    ],
+    timeLow: [
+      "Время душит, быстрее!",
+      "Шевелись, смена горит!",
+      "Ещё чуть-чуть и завалишь план."
+    ],
+    useBomb: [
+      "Ладно, взрывай эту кучу.",
+      "Пускай бомба расчистит мусор.",
+      "Ну всё, пошёл жёсткий метод."
+    ],
+    useLine: [
+      "Чистим ряд подчистую.",
+      "Сметай линию, не жалей.",
+      "Один ряд под нож."
+    ],
+    gameOver: [
+      "Смена провалена. Ноль премии.",
+      "План завален. Позорище.",
+      "Время вышло. Цех недоволен."
+    ]
+  }
+};
+
+const state = {
+  board: [],
+  selected: null,
+  score: 0,
+  level: 1,
+  target: TARGET_START,
+  time: TIME_START,
+  coins: 0,
+  bombs: 1,
+  lines: 1,
+  isBusy: false,
+  timer: null,
+  lastLowTimeMark: false
+};
+
+const els = {
+  grid: document.getElementById("grid"),
+  boss: document.getElementById("bossLine"),
+  level: document.getElementById("levelValue"),
+  score: document.getElementById("scoreValue"),
+  time: document.getElementById("timeValue"),
+  coins: document.getElementById("coinsValue"),
+  bombBtn: document.getElementById("bombBtn"),
+  lineBtn: document.getElementById("lineBtn"),
+  timeBtn: document.getElementById("timeBtn")
+};
+
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function say(type){
+  const arr = TEXTS.boss[type];
+  if (arr?.length) els.boss.textContent = rand(arr);
+}
+function idx(x,y){ return y * SIZE + x; }
+function xy(i){ return { x: i % SIZE, y: Math.floor(i / SIZE) }; }
+function inBounds(x,y){ return x >= 0 && x < SIZE && y >= 0 && y < SIZE; }
+function randomType(){ return TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)].id; }
+function tileById(id){ return TILE_TYPES.find(t => t.id === id); }
+
+function createRandomBoard() {
+  let board;
+  do {
+    board = Array.from({ length: SIZE * SIZE }, () => randomType());
+    removeInitialMatches(board);
+  } while (!hasAnyMoves(board));
+  return board;
 }
 
-function click(i){
- if(selected==null){selected=i;draw();return;}
- selected=null;
- score+=1;
- draw();
+function removeInitialMatches(board){
+  let safety = 0;
+  while (true) {
+    const matches = findMatches(board);
+    if (!matches.length) break;
+    for (const group of matches) {
+      for (const i of group) board[i] = randomType();
+    }
+    safety++;
+    if (safety > 50) break;
+  }
 }
 
-function useBomb(){score+=10;}
-function useLine(){score+=5;}
+function renderBoard(matched = new Set()){
+  els.grid.innerHTML = "";
+  state.board.forEach((id, i) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    if (state.selected === i) cell.classList.add("selected");
+    if (matched.has(i)) cell.classList.add("matched");
+    cell.dataset.index = i;
 
-function timerTick(){
- time--;
- if(time<=0){alert("Конец");location.reload();}
- draw();
+    const tile = tileById(id);
+    const img = document.createElement("div");
+    img.className = "tile-img";
+    img.style.backgroundImage = `url("${tile.src}")`;
+    img.title = tile.name;
+
+    cell.appendChild(img);
+    cell.addEventListener("click", () => onCellClick(i));
+    els.grid.appendChild(cell);
+  });
+
+  els.level.textContent = state.level;
+  els.score.textContent = `${state.score}/${state.target}`;
+  els.time.textContent = state.time;
+  els.coins.textContent = state.coins;
+  els.bombBtn.textContent = `💣 Бомба (${state.bombs})`;
+  els.lineBtn.textContent = `⚡ Линия (${state.lines})`;
 }
 
-setInterval(timerTick,1000);
+function areAdjacent(a,b){
+  const A = xy(a), B = xy(b);
+  return Math.abs(A.x - B.x) + Math.abs(A.y - B.y) === 1;
+}
 
-createBoard();
-draw();
+function swap(board, a, b){
+  [board[a], board[b]] = [board[b], board[a]];
+}
+
+function findMatches(board){
+  const groups = [];
+
+  // horizontal
+  for (let y = 0; y < SIZE; y++) {
+    let run = [idx(0,y)];
+    for (let x = 1; x < SIZE; x++) {
+      const prev = board[idx(x-1,y)];
+      const cur = board[idx(x,y)];
+      if (cur === prev) {
+        run.push(idx(x,y));
+      } else {
+        if (run.length >= 3) groups.push([...run]);
+        run = [idx(x,y)];
+      }
+    }
+    if (run.length >= 3) groups.push([...run]);
+  }
+
+  // vertical
+  for (let x = 0; x < SIZE; x++) {
+    let run = [idx(x,0)];
+    for (let y = 1; y < SIZE; y++) {
+      const prev = board[idx(x,y-1)];
+      const cur = board[idx(x,y)];
+      if (cur === prev) {
+        run.push(idx(x,y));
+      } else {
+        if (run.length >= 3) groups.push([...run]);
+        run = [idx(x,y)];
+      }
+    }
+    if (run.length >= 3) groups.push([...run]);
+  }
+
+  return groups;
+}
+
+function flattenGroups(groups){
+  return [...new Set(groups.flat())];
+}
+
+function applyGravity(board){
+  for (let x = 0; x < SIZE; x++) {
+    const col = [];
+    for (let y = SIZE - 1; y >= 0; y--) {
+      const value = board[idx(x,y)];
+      if (value !== null) col.push(value);
+    }
+    for (let y = SIZE - 1; y >= 0; y--) {
+      board[idx(x,y)] = col[SIZE - 1 - y] ?? randomType();
+    }
+  }
+}
+
+function hasAnyMoves(board){
+  for (let i = 0; i < board.length; i++) {
+    const {x,y} = xy(i);
+    const tests = [[x+1,y],[x,y+1]];
+    for (const [nx,ny] of tests) {
+      if (!inBounds(nx,ny)) continue;
+      const j = idx(nx,ny);
+      swap(board, i, j);
+      const has = findMatches(board).length > 0;
+      swap(board, i, j);
+      if (has) return true;
+    }
+  }
+  return false;
+}
+
+function shuffleBoard(){
+  say("shuffle");
+  state.isBusy = true;
+
+  const cells = [...els.grid.children];
+  cells.forEach(c => c.classList.add("shuffling"));
+
+  setTimeout(() => {
+    let next;
+    do {
+      next = [...state.board].sort(() => Math.random() - 0.5);
+      removeInitialMatches(next);
+    } while (!hasAnyMoves(next));
+
+    state.board = next;
+    state.selected = null;
+    state.isBusy = false;
+    renderBoard();
+  }, 360);
+}
+
+function createSparkles(index){
+  const {x,y} = xy(index);
+  const wrap = document.querySelector(".board-wrap");
+  const tile = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile"));
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap"));
+  const cx = x * (tile + gap) + tile / 2;
+  const cy = y * (tile + gap) + tile / 2;
+
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement("div");
+    s.className = "spark";
+    s.style.left = (cx - 6) + "px";
+    s.style.top = (cy - 6) + "px";
+    s.style.setProperty("--dx", `${(Math.random()*90 - 45).toFixed(0)}px`);
+    s.style.setProperty("--dy", `${(Math.random()*90 - 45).toFixed(0)}px`);
+    wrap.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
+}
+
+async function resolveBoard(){
+  let chain = 0;
+
+  while (true) {
+    const groups = findMatches(state.board);
+    if (!groups.length) break;
+
+    chain++;
+    const matched = new Set(flattenGroups(groups));
+    renderBoard(matched);
+
+    const count = matched.size;
+    if (count >= 5 || chain >= 2) say("bigMatch");
+    else say("match");
+
+    matched.forEach(i => createSparkles(i));
+    await wait(320);
+
+    for (const i of matched) state.board[i] = null;
+    applyGravity(state.board);
+
+    state.score += count;
+    state.coins += Math.max(1, Math.floor(count / 3));
+    renderBoard();
+
+    await wait(140);
+  }
+
+  if (state.score >= state.target) {
+    clearInterval(state.timer);
+    say("levelUp");
+    await wait(650);
+    state.level += 1;
+    state.target += 15;
+    state.time = TIME_START;
+    state.lastLowTimeMark = false;
+    state.board = createRandomBoard();
+    renderBoard();
+    startTimer();
+    return;
+  }
+
+  if (!hasAnyMoves(state.board)) {
+    shuffleBoard();
+  }
+}
+
+async function onCellClick(i){
+  if (state.isBusy) return;
+
+  if (state.selected === null) {
+    state.selected = i;
+    say("select");
+    renderBoard();
+    return;
+  }
+
+  if (state.selected === i) {
+    state.selected = null;
+    renderBoard();
+    return;
+  }
+
+  if (!areAdjacent(state.selected, i)) {
+    state.selected = i;
+    say("select");
+    renderBoard();
+    return;
+  }
+
+  state.isBusy = true;
+  swap(state.board, state.selected, i);
+  renderBoard();
+
+  const madeMatch = findMatches(state.board).length > 0;
+  if (!madeMatch) {
+    await wait(180);
+    swap(state.board, state.selected, i);
+    state.selected = null;
+    state.isBusy = false;
+    say("invalid");
+    renderBoard();
+    return;
+  }
+
+  state.selected = null;
+  await resolveBoard();
+  state.isBusy = false;
+  renderBoard();
+}
+
+function bombAt(center){
+  if (state.isBusy || state.bombs <= 0) return;
+  state.bombs--;
+  say("useBomb");
+  const {x,y} = xy(center);
+  const affected = [];
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      const nx = x + dx, ny = y + dy;
+      if (inBounds(nx, ny)) affected.push(idx(nx, ny));
+    }
+  }
+  performDirectRemove(affected);
+}
+
+function lineClearRow(row){
+  if (state.isBusy || state.lines <= 0) return;
+  state.lines--;
+  say("useLine");
+  const affected = [];
+  for (let x = 0; x < SIZE; x++) affected.push(idx(x,row));
+  performDirectRemove(affected);
+}
+
+async function performDirectRemove(indices){
+  state.isBusy = true;
+  const matched = new Set(indices);
+  renderBoard(matched);
+  matched.forEach(i => createSparkles(i));
+  await wait(320);
+  indices.forEach(i => state.board[i] = null);
+  applyGravity(state.board);
+  state.score += indices.length;
+  renderBoard();
+  await wait(120);
+  await resolveBoard();
+  state.isBusy = false;
+  renderBoard();
+}
+
+function buyTime(){
+  if (state.isBusy) return;
+  if (state.coins < 8) {
+    els.boss.textContent = "Не хватает кристаллов на время.";
+    return;
+  }
+  state.coins -= 8;
+  state.time += 20;
+  renderBoard();
+}
+
+function startTimer(){
+  clearInterval(state.timer);
+  state.timer = setInterval(() => {
+    state.time--;
+    if (state.time <= 10 && !state.lastLowTimeMark) {
+      say("timeLow");
+      state.lastLowTimeMark = true;
+    }
+    renderBoard();
+    if (state.time <= 0) {
+      clearInterval(state.timer);
+      say("gameOver");
+      state.isBusy = true;
+      setTimeout(() => {
+        alert(`Смена закончилась.\nСобрано дверей: ${state.score}\nКристаллы: ${state.coins}`);
+        state.score = 0;
+        state.level = 1;
+        state.target = TARGET_START;
+        state.time = TIME_START;
+        state.coins = 0;
+        state.bombs = 1;
+        state.lines = 1;
+        state.isBusy = false;
+        state.lastLowTimeMark = false;
+        state.board = createRandomBoard();
+        say("start");
+        renderBoard();
+        startTimer();
+      }, 150);
+    }
+  }, 1000);
+}
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function init(){
+  state.board = createRandomBoard();
+  say("start");
+  renderBoard();
+  startTimer();
+
+  els.bombBtn.addEventListener("click", () => {
+    const target = state.selected ?? Math.floor(Math.random() * state.board.length);
+    bombAt(target);
+  });
+  els.lineBtn.addEventListener("click", () => {
+    const target = state.selected ?? Math.floor(Math.random() * SIZE);
+    const row = state.selected !== null ? xy(state.selected).y : target;
+    lineClearRow(row);
+  });
+  els.timeBtn.addEventListener("click", buyTime);
+
+  if (window.Telegram?.WebApp) {
+    try { Telegram.WebApp.ready(); } catch {}
+  }
+}
+
+init();
 </script>
-
 </body>
 </html>
