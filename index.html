@@ -107,6 +107,12 @@
   </div>
   <div class="help">Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери. Процесс сохраняется автоматически: уровень, кристаллы, время, бусты и само поле.</div>
   <div class="credits">Один файл. Двери — SVG Repo door icons с CC0. Бригадир — OpenMoji Construction Worker, CC BY-SA 4.0.</div>
+
+  <div class="help" style="margin-top:12px">
+    <div style="font-weight:800;margin-bottom:8px">🏆 Рейтинг игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
+    <div id="leaderboard"></div>
+  </div>
+
 </div>
 
 <div class="overlay" id="levelOverlay">
@@ -166,7 +172,7 @@ const els={
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
   gameOverOverlay:document.getElementById("gameOverOverlay"), bossAvatarGameOver:document.getElementById("bossAvatarGameOver"),
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
-  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn")
+  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode")
 };
 els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
@@ -176,6 +182,166 @@ const say=type=>{ const arr=TEXTS.boss[type]; if(arr?.length) els.boss.textConte
 const idx=(x,y)=>y*SIZE+x, xy=i=>({x:i%SIZE,y:Math.floor(i/SIZE)}), inBounds=(x,y)=>x>=0&&x<SIZE&&y>=0&&y<SIZE;
 const randomType=()=>TILE_TYPES[Math.floor(Math.random()*TILE_TYPES.length)].id;
 const tileById=id=>TILE_TYPES.find(t=>t.id===id);
+
+
+
+const LEADERBOARD_KEY="door_factory_leaderboard_v1";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBYLA9pD_5qOZv6dU78vMwKDVxTgEOeDuo",
+  authDomain: "dveryreyting.firebaseapp.com",
+  projectId: "dveryreyting",
+  storageBucket: "dveryreyting.firebasestorage.app",
+  messagingSenderId: "4310120110",
+  appId: "1:4310120110:web:574361f829e5b4c6b99f3f"
+};
+
+let onlineDb = null;
+let leaderboardMode = "local";
+
+
+function playTone(freq=440, duration=0.12, type="triangle", volume=0.03, sweepTo=null){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+    if(!window.__doorAudioCtx) window.__doorAudioCtx = new AudioCtx();
+    const ctx = window.__doorAudioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if(sweepTo){
+      osc.frequency.exponentialRampToValueAtTime(Math.max(40, sweepTo), ctx.currentTime + duration);
+    }
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }catch(e){}
+}
+
+function playMatchSound(size=3){
+  playTone(540, 0.09, "triangle", 0.03, 700);
+  setTimeout(()=>playTone(size >= 5 ? 880 : 760, 0.12, "triangle", 0.035, size >= 5 ? 1100 : 920), 55);
+}
+
+function playBombSound(){
+  playTone(180, 0.08, "sawtooth", 0.045, 120);
+  setTimeout(()=>playTone(90, 0.22, "square", 0.04, 50), 35);
+}
+
+function playLineSound(){
+  playTone(260, 0.07, "sawtooth", 0.035, 700);
+  setTimeout(()=>playTone(820, 0.11, "triangle", 0.03, 1200), 45);
+}
+
+function getPlayerName(){
+  try{
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if(tgUser){
+      return tgUser.first_name || tgUser.username || "Игрок";
+    }
+  }catch(e){}
+  return "Игрок";
+}
+
+
+async function initOnlineLeaderboard(){
+  try{
+    if (!FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.projectId === "PASTE_PROJECT_ID") {
+      leaderboardMode = "local";
+      return;
+    }
+
+    const firebaseAppMod = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js");
+    const firestoreMod = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
+
+    const app = firebaseAppMod.initializeApp(FIREBASE_CONFIG);
+    onlineDb = firestoreMod.getFirestore(app);
+
+    window.__fb = { firestoreMod, app };
+    leaderboardMode = "online";
+    await renderLeaderboard();
+  }catch(e){
+    console.error("Firebase init failed:", e);
+    leaderboardMode = "local";
+  }
+}
+
+async function saveLeaderboardEntry(){
+  const entry = {
+    name: getPlayerName(),
+    score: state.score,
+    level: state.level,
+    coins: state.coins,
+    ts: Date.now()
+  };
+
+  if (leaderboardMode === "online" && onlineDb && window.__fb?.firestoreMod) {
+    try{
+      const { collection, addDoc } = window.__fb.firestoreMod;
+      await addDoc(collection(onlineDb, "leaderboard"), entry);
+      return;
+    }catch(e){
+      console.error("Online save failed, using local fallback:", e);
+    }
+  }
+
+  let lb = [];
+  try{ lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }catch(e){}
+  lb.push(entry);
+  lb.sort((a,b)=> (b.level - a.level) || (b.score - a.score) || (b.coins - a.coins) || (a.ts - b.ts));
+  lb = lb.slice(0,10);
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
+}
+
+async function renderLeaderboard(){
+  if(!els.leaderboard) return;
+  if(els.lbMode) els.lbMode.textContent = leaderboardMode === "online" ? "(онлайн)" : "(локально)";
+
+  if (leaderboardMode === "online" && onlineDb && window.__fb?.firestoreMod) {
+    try{
+      const { collection, getDocs, query, orderBy, limit } = window.__fb.firestoreMod;
+      const q = query(
+        collection(onlineDb, "leaderboard"),
+        orderBy("level", "desc"),
+        orderBy("score", "desc"),
+        orderBy("coins", "desc"),
+        limit(10)
+      );
+      const snap = await getDocs(q);
+      const lb = snap.docs.map(d => d.data());
+      if(!lb.length){
+        els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
+        return;
+      }
+      els.leaderboard.innerHTML = lb.map((p, i) => 
+        `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:${i ? '1px solid rgba(255,255,255,.08)' : 'none'}">
+          <span>${i+1}. ${p.name || "Игрок"}</span>
+          <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💎 ${p.coins || 0}</span>
+        </div>`
+      ).join("");
+      return;
+    }catch(e){
+      console.error("Online read failed, using local fallback:", e);
+    }
+  }
+
+  let lb = [];
+  try{ lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }catch(e){}
+  if(!lb.length){
+    els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
+    return;
+  }
+  els.leaderboard.innerHTML = lb.map((p, i) => 
+    `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:${i ? '1px solid rgba(255,255,255,.08)' : 'none'}">
+      <span>${i+1}. ${p.name}</span>
+      <span>ур. ${p.level} · ${p.score} дверей · 💎 ${p.coins}</span>
+    </div>`
+  ).join("");
+}
+
 
 function saveGame(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -212,6 +378,7 @@ function renderBoard(matched=new Set()){
   els.bombBtn.textContent=`💣 Бомба (${state.bombs})`; els.lineBtn.textContent=`⚡ Линия (${state.lines})`;
   els.buyBombBtn.textContent=`🛒 Купить бомбу (${BOMB_COST})`; els.buyLineBtn.textContent=`🛒 Купить линию (${LINE_COST})`;
   saveGame();
+  Promise.resolve(renderLeaderboard());
 }
 const areAdjacent=(a,b)=>{ const A=xy(a), B=xy(b); return Math.abs(A.x-B.x)+Math.abs(A.y-B.y)===1; };
 const swap=(board,a,b)=>{ [board[a],board[b]]=[board[b],board[a]]; };
@@ -258,6 +425,7 @@ async function resolveBoard(){
     const groups=findMatches(state.board); if(!groups.length) break; chain++;
     const matched=new Set(flattenGroups(groups)); renderBoard(matched);
     const count=matched.size; if(count>=5||chain>=2) say("bigMatch"); else say("match");
+    playMatchSound(count);
     matched.forEach(i=>createSparkles(i)); await wait(340);
     for(const i of matched) state.board[i]=null; applyGravity(state.board);
     state.score+=count; state.coins+=Math.max(1,Math.floor(count/3)); renderBoard(); await wait(140);
@@ -294,7 +462,8 @@ function lineClearRow(row){
 }
 async function performDirectRemove(indices,type,row=0){
   state.isBusy=true; const matched=new Set(indices); renderBoard(matched); matched.forEach(i=>createSparkles(i));
-  if(type==="bomb") showBlast(indices); if(type==="line") showLineFlash(row);
+  if(type==="bomb"){ showBlast(indices); playBombSound(); }
+  if(type==="line"){ showLineFlash(row); playLineSound(); }
   await wait(340); indices.forEach(i=>state.board[i]=null); applyGravity(state.board); state.score+=indices.length; renderBoard(); await wait(140); await resolveBoard(); state.isBusy=false; renderBoard();
 }
 function buyTime(){ if(state.isBusy) return; if(state.coins<TIME_COST){ say("noCoins"); return; } state.coins-=TIME_COST; state.time+=20; renderBoard(); }
@@ -306,7 +475,7 @@ function startTimer(){
     state.time--;
     if(state.time<=10 && !state.lastLowTimeMark){ say("timeLow"); state.lastLowTimeMark=true; }
     renderBoard();
-    if(state.time<=0){ clearInterval(state.timer); say("gameOver"); state.isBusy=true; setTimeout(showGameOverOverlay,150); }
+    if(state.time<=0){ clearInterval(state.timer); say("gameOver"); saveLeaderboardEntry(); state.isBusy=true; setTimeout(showGameOverOverlay,150); }
   },1000);
 }
 function showGameOverOverlay(){
@@ -321,9 +490,9 @@ function resetGame(){
   localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=TARGET_START; state.time=TIME_START; state.coins=0; state.bombs=1; state.lines=1; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-function init(){
+async function init(){
   if(!loadGame()) state.board=createRandomBoard();
-  say("start"); renderBoard(); startTimer();
+  say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard(); startTimer();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
   els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine;
