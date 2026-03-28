@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Door Factory PRO</title>
+
+<style>
+body {
+  margin:0;
+  background:linear-gradient(#1a1a1a,#000);
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+
+.topbar {
+  background:#222;
+  padding:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+.boss {
+  background:#2b2b2b;
+  padding:10px;
+  border-radius:10px;
+  margin:10px;
+  color:#ffb347;
+  font-weight:bold;
+  box-shadow:0 0 10px orange;
+}
+
+.panel {
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+  box-shadow:inset 0 0 10px #000;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(6,60px);
+  gap:8px;
+  justify-content:center;
+}
+
+.cell {
+  width:60px;
+  height:60px;
+  border-radius:12px;
+  background:linear-gradient(145deg,#5a3d1a,#2e1c0c);
+  box-shadow:0 5px 10px rgba(0,0,0,0.8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.cell:hover {
+  transform:scale(1.1);
+}
+
+.selected {
+  outline:3px solid gold;
+}
+
+.match {
+  animation:pop 0.3s;
+}
+
+@keyframes pop {
+  50%{transform:scale(1.3)}
+  100%{transform:scale(0);opacity:0}
+}
+
+.buttons button {
+  margin:5px;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 3px 8px black;
+}
+
+.bomb {background:#c0392b;}
+.line {background:#f1c40f;}
+.time {background:#3498db;}
+.bonus {background:#2ecc71;}
+.donate {background:#e67e22;}
+
+.leaderboard {
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <h2>🚪 Завод дверей</h2>
+</div>
+
+<div class="boss" id="boss">Бригадир: Начали смену!</div>
+
+<div class="panel">
+  <div id="level">Уровень: 1</div>
+  <div id="score">0</div>
+  <div id="timer">60</div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="buttons">
+  <button class="bomb" onclick="useBomb()">💣 Бомба</button>
+  <button class="line" onclick="useLine()">⚡ Линия</button>
+  <button class="time" onclick="time+=20">⏱ +20</button>
+  <button class="bonus" onclick="coins+=20">🎁</button>
+  <button class="donate" onclick="alert('донат')">💰</button>
+</div>
+
+<div class="leaderboard" id="leaderboard"></div>
+
+<script>
+const width=6;
+const doors=["🚪","🚪","🚪","🚪","🚪"];
+let board=[],selected=null;
+let score=0,level=1,time=60;
+
+function rand(){return doors[Math.floor(Math.random()*doors.length)];}
+function createBoard(){board=Array(36).fill().map(rand);}
+
+function draw(){
+ let g=document.getElementById("grid");
+ g.innerHTML="";
+ board.forEach((d,i)=>{
+  let div=document.createElement("div");
+  div.className="cell";
+  if(selected===i) div.classList.add("selected");
+  div.innerText=d;
+  div.onclick=()=>click(i);
+  g.appendChild(div);
+ });
+ document.getElementById("score").innerText="Собрано: "+score;
+ document.getElementById("timer").innerText="Время: "+time;
+}
+
+function click(i){
+ if(selected==null){selected=i;draw();return;}
+ selected=null;
+ score+=1;
+ draw();
+}
+
+function useBomb(){score+=10;}
+function useLine(){score+=5;}
+
+function timerTick(){
+ time--;
+ if(time<=0){alert("Конец");location.reload();}
+ draw();
+}
+
+setInterval(timerTick,1000);
+
+createBoard();
+draw();
+</script>
+
+</body>
+</html>
