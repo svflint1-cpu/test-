@@ -67,6 +67,7 @@
   .action-grid{display:grid;gap:10px}
   .action-grid.tools{grid-template-columns:repeat(3,1fr)}
   .action-grid.shop{grid-template-columns:repeat(2,1fr)}
+  .quick-note{font-size:12px;opacity:.92;margin-top:4px}
   button{border:none;border-radius:18px;padding:12px 10px;color:white;font-weight:800;cursor:pointer;box-shadow:0 10px 18px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.12);transition:transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease}
   button:hover{transform:translateY(-1px);filter:brightness(1.04)}
   button:active{transform:translateY(1px) scale(.99)}
@@ -232,46 +233,46 @@
       </div>
       <div class="action-grid tools">
         <button class="action-btn btn-bomb" id="bombBtn">
-          <span class="pill" id="bombCount">1 шт</span>
+          <span class="pill" id="bombCount">10 💎</span>
           <span class="icon">💣</span>
-          <span class="name">Бомба</span>
-          <span class="meta">Взрыв 3×3 по клетке</span>
+          <span class="name">Бомба 3×3</span>
+          <span class="meta">Нажал → выбрал клетку → сразу бах</span>
         </button>
         <button class="action-btn btn-line" id="lineBtn">
-          <span class="pill" id="lineCount">1 шт</span>
+          <span class="pill" id="lineCount">12 💎</span>
           <span class="icon">⚡</span>
           <span class="name">Линия</span>
-          <span class="meta">Сносит весь ряд</span>
+          <span class="meta">Нажал → ткнул в ряд → сразу снос</span>
         </button>
         <button class="action-btn btn-time" id="timeBtn">
           <span class="pill">8 💎</span>
           <span class="icon">⏱</span>
           <span class="name">+20 секунд</span>
-          <span class="meta">Сразу добавить время</span>
+          <span class="meta">Покупается и применяется мгновенно</span>
         </button>
       </div>
-      <div class="action-hint" id="toolHint">Подсказка: выбери бомбу или линию, потом нажми по нужной клетке. Время добавляется сразу.</div>
+      <div class="action-hint" id="toolHint">Подсказка: нажми на усиление внизу, потом ткни по полю. Заряды не копятся — на кнопке сразу показана цена.</div>
     </div>
 
     <div class="action-card">
       <div class="action-head">
         <div>
-          <div class="action-title">Магазин</div>
-          <div class="action-sub">Покупай усиления за кристаллы</div>
+          <div class="action-title">Быстрый доступ</div>
+          <div class="action-sub">Дубли снизу, чтобы жать было удобнее</div>
         </div>
       </div>
       <div class="action-grid shop">
         <button class="action-btn btn-buy-bomb" id="buyBombBtn">
           <span class="pill">10 💎</span>
-          <span class="icon">🛒💣</span>
-          <span class="name">Купить бомбу</span>
-          <span class="meta">+1 в инвентарь</span>
+          <span class="icon">🧨</span>
+          <span class="name">Быстрая бомба</span>
+          <span class="meta">Сразу включает режим бомбы</span>
         </button>
         <button class="action-btn btn-buy-line" id="buyLineBtn">
           <span class="pill">12 💎</span>
-          <span class="icon">🛒⚡</span>
-          <span class="name">Купить линию</span>
-          <span class="meta">+1 в инвентарь</span>
+          <span class="icon">📏</span>
+          <span class="name">Быстрая линия</span>
+          <span class="meta">Сразу включает режим линии</span>
         </button>
         <button id="rewardBtn" class="action-btn reward-btn">
           <span class="pill">+50 💎</span>
@@ -366,7 +367,7 @@ const TEXTS={boss:{
   specialBoom:["Бутылка рванула как надо.","Вот это хлопок по складу.","Спецбутылка расчистила поле."]
 },overlay:{title:"Молодец!",text:"Ты переходишь на новый уровень. Ты готов?",button:"Погнали"}};
 
-const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,bombs:1,lines:1,isBusy:false,timer:null,lastLowTimeMark:false};
+const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,isBusy:false,timer:null,lastLowTimeMark:false};
 const els={
   grid:document.getElementById("grid"), boss:document.getElementById("bossLine"), level:document.getElementById("levelValue"),
   score:document.getElementById("scoreValue"), time:document.getElementById("timeValue"), coins:document.getElementById("coinsValue"),
@@ -628,7 +629,7 @@ async function watchRewardedAd(){
 function saveGame(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     board:state.board, selected:state.selected, score:state.score, level:state.level, target:state.target,
-    time:state.time, coins:state.coins, bombs:state.bombs, lines:state.lines, lastLowTimeMark:state.lastLowTimeMark
+    time:state.time, coins:state.coins, lastLowTimeMark:state.lastLowTimeMark
   }));
 }
 function loadGame(){
@@ -640,7 +641,7 @@ function loadGame(){
     if(!d.board.every(id => validIds.has(id))) return false;
     state.board=d.board; state.selected=typeof d.selected==="number"?d.selected:null; state.score=Number(d.score)||0; state.level=Number(d.level)||1;
     state.target=Number(d.target)||TARGET_START; state.time=Math.max(1,Number(d.time)||TIME_START); state.coins=Number(d.coins)||0;
-    state.bombs=Number(d.bombs)||0; state.lines=Number(d.lines)||0; state.lastLowTimeMark=!!d.lastLowTimeMark; state.activeTool=null;
+    state.lastLowTimeMark=!!d.lastLowTimeMark; state.activeTool=null;
     return true;
   }catch{return false;}
 }
@@ -667,18 +668,18 @@ function updateToolUI(){
   const active = state.activeTool;
   els.bombBtn.classList.toggle("active", active === "bomb");
   els.lineBtn.classList.toggle("active", active === "line");
-  if(els.bombCount) els.bombCount.textContent = `${state.bombs} шт`;
-  if(els.lineCount) els.lineCount.textContent = `${state.lines} шт`;
+  if(els.bombCount) els.bombCount.textContent = `${BOMB_COST} 💎`;
+  if(els.lineCount) els.lineCount.textContent = `${LINE_COST} 💎`;
   if(els.toolHint){
-    if(active === "bomb") els.toolHint.textContent = "Режим бомбы активен: нажми по клетке, и рванёт квадрат 3×3.";
-    else if(active === "line") els.toolHint.textContent = "Режим линии активен: нажми по любой клетке нужного ряда.";
-    else els.toolHint.textContent = "Подсказка: выбери бомбу или линию, потом нажми по нужной клетке. Время добавляется сразу.";
+    if(active === "bomb") els.toolHint.textContent = `Бомба готова: ткни по клетке, спишется ${BOMB_COST} 💎 и рванёт квадрат 3×3.`;
+    else if(active === "line") els.toolHint.textContent = `Линия готова: ткни по любой клетке ряда, спишется ${LINE_COST} 💎 и снесёт всю полосу.`;
+    else els.toolHint.textContent = "Подсказка: нажми на усиление внизу, потом ткни по полю. Заряды не копятся — на кнопке сразу показана цена.";
   }
 }
 function toggleTool(tool){
   if(state.isBusy) return;
-  if(tool === "bomb" && state.bombs <= 0){ say("noCoins"); return; }
-  if(tool === "line" && state.lines <= 0){ say("noCoins"); return; }
+  if(tool === "bomb" && state.coins < BOMB_COST){ say("noCoins"); return; }
+  if(tool === "line" && state.coins < LINE_COST){ say("noCoins"); return; }
   state.activeTool = state.activeTool === tool ? null : tool;
   updateToolUI();
 }
@@ -854,12 +855,12 @@ async function detonateSpecialAt(center){
   await performDirectRemove(affected,"special",0,center);
 }
 function bombAt(center){
-  if(state.isBusy||state.bombs<=0) return; state.bombs--; state.activeTool=null; say("useBomb");
+  if(state.isBusy||state.coins<BOMB_COST) { say("noCoins"); return; } state.coins-=BOMB_COST; state.activeTool=null; say("useBomb");
   const {x,y}=xy(center), affected=[]; for(let dx=-1;dx<=1;dx++){ for(let dy=-1;dy<=1;dy++){ const nx=x+dx, ny=y+dy; if(inBounds(nx,ny)) affected.push(idx(nx,ny)); } }
   performDirectRemove(affected,"bomb");
 }
 function lineClearRow(row){
-  if(state.isBusy||state.lines<=0) return; state.lines--; state.activeTool=null; say("useLine");
+  if(state.isBusy||state.coins<LINE_COST) { say("noCoins"); return; } state.coins-=LINE_COST; state.activeTool=null; say("useLine");
   const affected=[]; for(let x=0;x<SIZE;x++) affected.push(idx(x,row));
   performDirectRemove(affected,"line",row);
 }
@@ -883,8 +884,8 @@ async function performDirectRemove(indices,type,row=0,center=null){
   renderBoard();
 }
 function buyTime(){ if(state.isBusy) return; if(state.coins<TIME_COST){ say("noCoins"); return; } state.coins-=TIME_COST; state.time+=20; state.activeTool=null; renderBoard(); }
-function buyBomb(){ if(state.isBusy) return; if(state.coins<BOMB_COST){ say("noCoins"); return; } state.coins-=BOMB_COST; state.bombs++; say("buyBomb"); renderBoard(); }
-function buyLine(){ if(state.isBusy) return; if(state.coins<LINE_COST){ say("noCoins"); return; } state.coins-=LINE_COST; state.lines++; say("buyLine"); renderBoard(); }
+function buyBomb(){ if(state.isBusy) return; if(state.coins<BOMB_COST){ say("noCoins"); return; } state.activeTool="bomb"; say("buyBomb"); updateToolUI(); }
+function buyLine(){ if(state.isBusy) return; if(state.coins<LINE_COST){ say("noCoins"); return; } state.activeTool="line"; say("buyLine"); updateToolUI(); }
 function startTimer(){
   clearInterval(state.timer);
   state.timer=setInterval(()=>{
@@ -903,7 +904,7 @@ function showGameOverOverlay(){
   els.restartBtn.addEventListener("click", clickHandler);
 }
 function resetGame(){
-  localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.bombs=1; state.lines=1; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
+  localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
