@@ -214,7 +214,7 @@
   <div class="shop">
     <button id="buyBombBtn">🛒 Купить бомбу (10)</button>
     <button id="buyLineBtn">🛒 Купить линию (12)</button>
-    <button id="rewardBtn" class="reward-btn">🎥 +50 кристаллов за видео</button>
+    
   </div>
   <div class="help">Собирай 3+ одинаковые двери в ряд. Если раньше игра открывалась криво, эта версия использует новый сейв и поле должно появиться нормально.</div>
   <div class="credits">Создано при помощи "Чайки" </div>
@@ -295,7 +295,7 @@ const els={
   grid:document.getElementById("grid"), boss:document.getElementById("bossLine"), level:document.getElementById("levelValue"),
   score:document.getElementById("scoreValue"), time:document.getElementById("timeValue"), coins:document.getElementById("coinsValue"),
   bombBtn:document.getElementById("bombBtn"), lineBtn:document.getElementById("lineBtn"), timeBtn:document.getElementById("timeBtn"),
-  buyBombBtn:document.getElementById("buyBombBtn"), buyLineBtn:document.getElementById("buyLineBtn"), rewardBtn:document.getElementById("rewardBtn"),
+  buyBombBtn:document.getElementById("buyBombBtn"), buyLineBtn:document.getElementById("buyLineBtn"), 
   overlay:document.getElementById("levelOverlay"), overlayTitle:document.getElementById("overlayTitle"),
   overlayText:document.getElementById("overlayText"), goBtn:document.getElementById("goBtn"),
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
@@ -520,15 +520,7 @@ async function renderLeaderboard(){
 
 
 
-async function watchRewardedAd(){
-  if(state.isBusy) return;
-
-  try{
-    if(typeof window.showDoorRewardedAd === "function"){
-      const rewarded = await window.showDoorRewardedAd();
-      if(rewarded){
-        state.coins += REWARDED_COINS;
-        els.boss.textContent = `Бригадир: Забрал +${REWARDED_COINS} кристаллов. Работай дальше.`;
+ кристаллов. Работай дальше.`;
         renderBoard();
         return;
       }
@@ -707,7 +699,7 @@ async function init(){
   say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
-  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
+  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; 
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
 init();
