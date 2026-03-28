@@ -59,33 +59,26 @@
   @keyframes blast{0%{opacity:1;transform:translate(-50%,-50%) scale(.15)}60%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
   .line-flash{position:absolute;left:0;right:0;border-radius:18px;pointer-events:none;background:linear-gradient(90deg,rgba(80,170,255,0),rgba(140,220,255,.95),rgba(80,170,255,0));box-shadow:0 0 18px rgba(100,200,255,.9);animation:lineFlash .48s ease-out forwards;z-index:13}
   @keyframes lineFlash{0%{opacity:0;transform:translateX(-18px)}30%{opacity:1}100%{opacity:0;transform:translateX(18px)}}
-  .action-panels{display:grid;gap:12px;margin-top:12px}
-  .action-card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:12px;box-shadow:0 12px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.04)}
-  .action-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-  .action-title{font-size:15px;font-weight:900;letter-spacing:.2px}
-  .action-sub{font-size:12px;opacity:.72}
-  .action-grid{display:grid;gap:10px}
-  .action-grid.tools{grid-template-columns:repeat(3,1fr)}
-  .action-grid.shop{grid-template-columns:repeat(2,1fr)}
-  .quick-note{font-size:12px;opacity:.92;margin-top:4px}
+  .action-panels{display:grid;gap:10px;margin-top:12px}
+  .controls,.shop{display:grid;gap:10px}
+  .controls{grid-template-columns:repeat(3,1fr);margin-bottom:0}
+  .shop{grid-template-columns:1fr}
   button{border:none;border-radius:18px;padding:12px 10px;color:white;font-weight:800;cursor:pointer;box-shadow:0 10px 18px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.12);transition:transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease}
   button:hover{transform:translateY(-1px);filter:brightness(1.04)}
   button:active{transform:translateY(1px) scale(.99)}
-  .action-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:82px;text-align:left;overflow:hidden}
-  .action-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,0) 42%);pointer-events:none}
-  .action-btn .icon{font-size:22px;line-height:1;margin-bottom:8px}
-  .action-btn .name{font-size:14px;line-height:1.1;position:relative;z-index:1}
-  .action-btn .meta{font-size:12px;opacity:.86;margin-top:6px;position:relative;z-index:1}
-  .action-btn .pill{position:absolute;top:10px;right:10px;font-size:11px;font-weight:900;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.22);backdrop-filter:blur(4px);z-index:1}
-  .action-btn.active{box-shadow:0 0 0 2px rgba(255,220,140,.82), 0 0 0 7px rgba(255,220,140,.12), 0 10px 18px rgba(0,0,0,.3)}
-  .action-btn.active .pill{background:rgba(255,215,90,.22)}
+  .tool-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:78px;text-align:left;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+  .tool-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 46%);pointer-events:none}
+  .tool-btn .btn-main,.reward-btn .btn-main{position:relative;z-index:1;font-size:15px;line-height:1.15}
+  .tool-btn .btn-sub,.reward-btn .btn-sub{position:relative;z-index:1;font-size:12px;opacity:.92;margin-top:7px;color:rgba(255,245,230,.92)}
+  .tool-btn .btn-price{position:absolute;top:10px;right:10px;z-index:1;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.24);font-size:11px;font-weight:900;letter-spacing:.2px;backdrop-filter:blur(4px)}
+  .tool-btn.active{box-shadow:0 0 0 2px rgba(255,220,140,.82), 0 0 0 7px rgba(255,220,140,.12), 0 10px 18px rgba(0,0,0,.3)}
+  .tool-btn.active .btn-price{background:rgba(255,215,90,.22)}
   .btn-bomb{background:linear-gradient(180deg,#f06f62,#b33025)}
   .btn-line{background:linear-gradient(180deg,#65b6ff,#2d67de)}
   .btn-time{background:linear-gradient(180deg,#ffbe56,#de7f18)}
-  .btn-buy-bomb{background:linear-gradient(180deg,#9f72ff,#6138bb)}
-  .btn-buy-line{background:linear-gradient(180deg,#7d8bff,#4850c7)}
-  .reward-btn{grid-column:1 / -1;background:linear-gradient(180deg,#ff8a63,#c94931) !important;min-height:72px}
-  .action-hint{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:13px;line-height:1.35;color:#ffe7c5}
+  .reward-btn{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:72px;background:linear-gradient(180deg,#8d61e9,#5b34a8) !important;border:1px solid rgba(255,255,255,.12)}
+  .reward-btn .btn-sub{font-size:13px}
+  .action-hint{margin-top:0;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:13px;line-height:1.35;color:#ffe7c5}
   .lb-row{
     display:flex;
     justify-content:space-between;
@@ -207,6 +200,11 @@
   }
 
   @media (max-width:520px){:root{--tile:calc((100vw - 28px - 5 * 8px) / 6);--board-w:calc(var(--tile) * 6 + var(--gap) * 5)}.title{font-size:24px}.boss .line{font-size:15px}.stat .v{font-size:16px}.action-grid.tools,.action-grid.shop{grid-template-columns:1fr}.action-btn{min-height:74px}}
+
+  @media (max-width:720px){
+    .controls{grid-template-columns:1fr}
+  }
+
 </style>
 </head>
 <body>
@@ -224,64 +222,30 @@
   </div>
   <div class="board-wrap"><div class="grid" id="grid"></div></div>
   <div class="action-panels">
-    <div class="action-card">
-      <div class="action-head">
-        <div>
-          <div class="action-title">Инструменты смены</div>
-          <div class="action-sub">Сначала выбери инструмент, потом ткни по полю</div>
-        </div>
-      </div>
-      <div class="action-grid tools">
-        <button class="action-btn btn-bomb" id="bombBtn">
-          <span class="pill" id="bombCount">10 💎</span>
-          <span class="icon">💣</span>
-          <span class="name">Бомба 3×3</span>
-          <span class="meta">Нажал → выбрал клетку → сразу бах</span>
-        </button>
-        <button class="action-btn btn-line" id="lineBtn">
-          <span class="pill" id="lineCount">12 💎</span>
-          <span class="icon">⚡</span>
-          <span class="name">Линия</span>
-          <span class="meta">Нажал → ткнул в ряд → сразу снос</span>
-        </button>
-        <button class="action-btn btn-time" id="timeBtn">
-          <span class="pill">8 💎</span>
-          <span class="icon">⏱</span>
-          <span class="name">+20 секунд</span>
-          <span class="meta">Покупается и применяется мгновенно</span>
-        </button>
-      </div>
-      <div class="action-hint" id="toolHint">Подсказка: нажми на усиление внизу, потом ткни по полю. Заряды не копятся — на кнопке сразу показана цена.</div>
+    <div class="controls">
+      <button class="tool-btn btn-bomb" id="bombBtn">
+        <span class="btn-price" id="bombCount">10 💎</span>
+        <span class="btn-main">💣 Бомба 3×3</span>
+        <span class="btn-sub">Нажал → ткнул по клетке → бах</span>
+      </button>
+      <button class="tool-btn btn-line" id="lineBtn">
+        <span class="btn-price" id="lineCount">12 💎</span>
+        <span class="btn-main">⚡ Линия</span>
+        <span class="btn-sub">Нажал → ткнул в ряд → снос всей полосы</span>
+      </button>
+      <button class="tool-btn btn-time" id="timeBtn">
+        <span class="btn-price">8 💎</span>
+        <span class="btn-main">⏱ +20 секунд</span>
+        <span class="btn-sub">Покупается и применяется сразу</span>
+      </button>
     </div>
-
-    <div class="action-card">
-      <div class="action-head">
-        <div>
-          <div class="action-title">Быстрый доступ</div>
-          <div class="action-sub">Дубли снизу, чтобы жать было удобнее</div>
-        </div>
-      </div>
-      <div class="action-grid shop">
-        <button class="action-btn btn-buy-bomb" id="buyBombBtn">
-          <span class="pill">10 💎</span>
-          <span class="icon">🧨</span>
-          <span class="name">Быстрая бомба</span>
-          <span class="meta">Сразу включает режим бомбы</span>
-        </button>
-        <button class="action-btn btn-buy-line" id="buyLineBtn">
-          <span class="pill">12 💎</span>
-          <span class="icon">📏</span>
-          <span class="name">Быстрая линия</span>
-          <span class="meta">Сразу включает режим линии</span>
-        </button>
-        <button id="rewardBtn" class="action-btn reward-btn">
-          <span class="pill">+50 💎</span>
-          <span class="icon">🎥</span>
-          <span class="name">Смотреть видео</span>
-          <span class="meta">Награда за просмотр рекламы</span>
-        </button>
-      </div>
+    <div class="shop">
+      <button id="rewardBtn" class="reward-btn">
+        <span class="btn-main">🎥 Смотреть видео</span>
+        <span class="btn-sub">Получить +50 кристаллов</span>
+      </button>
     </div>
+    <div class="action-hint" id="toolHint">Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.</div>
   </div>
   <div class="help">Собирай 3+ одинаковые двери в ряд. За 4 подряд появляется маленькая бутылка 🍺 (взрыв 2x2), за 5 подряд — большая 🍺 (взрыв 3x3). Чтобы рванула, просто передвинь бутылку.</div>
   <div class="credits">Создано при помощи "Чайки" </div>
@@ -673,7 +637,7 @@ function updateToolUI(){
   if(els.toolHint){
     if(active === "bomb") els.toolHint.textContent = `Бомба готова: ткни по клетке, спишется ${BOMB_COST} 💎 и рванёт квадрат 3×3.`;
     else if(active === "line") els.toolHint.textContent = `Линия готова: ткни по любой клетке ряда, спишется ${LINE_COST} 💎 и снесёт всю полосу.`;
-    else els.toolHint.textContent = "Подсказка: нажми на усиление внизу, потом ткни по полю. Заряды не копятся — на кнопке сразу показана цена.";
+    else els.toolHint.textContent = "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
   }
 }
 function toggleTool(tool){
@@ -927,7 +891,7 @@ async function init(){
   say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
   els.bombBtn.onclick=()=>toggleTool("bomb");
   els.lineBtn.onclick=()=>toggleTool("line");
-  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
+  els.timeBtn.onclick=buyTime; if(els.buyBombBtn) els.buyBombBtn.onclick=buyBomb; if(els.buyLineBtn) els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
   updateToolUI();
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
