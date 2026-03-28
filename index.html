@@ -7,15 +7,15 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root{
-    --bg1:#1b120d;
-    --bg2:#0d0907;
-    --panel:#2b1d14;
-    --panel2:#3b291c;
-    --gold:#ffcc66;
+    --bg1:#1d130d;
+    --bg2:#0d0805;
+    --panel:#342218;
+    --panel2:#4d3425;
+    --gold:#ffcf6e;
     --text:#fff6e9;
     --accent:#ff8b3d;
-    --danger:#ff5959;
-    --ok:#55d18a;
+    --danger:#ff5d5d;
+    --ok:#52d68a;
     --tile:72px;
     --gap:8px;
     --board-w: calc(var(--tile) * 6 + var(--gap) * 5);
@@ -27,29 +27,48 @@
     color:var(--text);
     font-family:Arial, Helvetica, sans-serif;
     background:
-      radial-gradient(circle at top, #4b2f20 0%, #1a120e 35%, #0a0705 100%);
+      radial-gradient(circle at top, #533522 0%, #22150f 30%, #0a0605 100%);
     display:flex;
     justify-content:center;
     padding:14px;
   }
-  .app{
-    width:min(100%, 470px);
-  }
+  .app{ width:min(100%, 470px); }
   .title{
     text-align:center;
     font-size:28px;
     font-weight:900;
     margin:4px 0 10px;
-    text-shadow:0 2px 0 #000, 0 0 14px rgba(255,170,80,.4);
+    text-shadow:0 2px 0 #000, 0 0 14px rgba(255,170,80,.35);
   }
   .boss{
-    background:linear-gradient(180deg, #533722, #312015);
+    display:flex;
+    gap:10px;
+    align-items:center;
+    background:linear-gradient(180deg, #5b3a25, #2f1f15);
     border:2px solid #8d613f;
     border-radius:18px;
     padding:10px 14px;
-    min-height:66px;
+    min-height:84px;
     box-shadow:0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
     margin-bottom:10px;
+  }
+  .boss-avatar{
+    width:56px;
+    height:56px;
+    flex:0 0 56px;
+    border-radius:50%;
+    background:#fff5e8;
+    border:2px solid rgba(255,255,255,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    box-shadow:0 6px 12px rgba(0,0,0,.25);
+  }
+  .boss-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
   }
   .boss .label{
     color:#ffc36e;
@@ -77,7 +96,7 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   }
   .stat .k{
-    color:#cfa98b;
+    color:#d8b299;
     font-size:12px;
     margin-bottom:3px;
   }
@@ -104,8 +123,8 @@
     border-radius:18px;
     background:
       linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 25%),
-      linear-gradient(180deg, #6a4631, #372319);
-    border:2px solid rgba(255,220,180,.15);
+      linear-gradient(180deg, #6f4d37, #3a271d);
+    border:2px solid rgba(255,220,180,.16);
     box-shadow:
       0 8px 16px rgba(0,0,0,.35),
       inset 0 1px 0 rgba(255,255,255,.08),
@@ -120,31 +139,38 @@
     outline:3px solid var(--gold);
     box-shadow:0 0 0 4px rgba(255,204,102,.18), 0 10px 18px rgba(0,0,0,.4);
   }
-  .cell.shuffling{
-    animation:shake .35s ease;
-  }
+  .cell.shuffling{ animation:shake .35s ease; }
   @keyframes shake{
     0%,100%{transform:translateX(0)}
     25%{transform:translateX(-4px)}
     50%{transform:translateX(4px)}
     75%{transform:translateX(-3px)}
   }
-  .tile-img{
+  .tile-inner{
     position:absolute;
     inset:8px;
     border-radius:12px;
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+    background:
+      radial-gradient(circle at 35% 28%, rgba(255,255,255,.18), rgba(255,255,255,0) 40%),
+      linear-gradient(180deg, var(--c1), var(--c2));
   }
-  .cell.matched .tile-img{
-    animation:collect .32s ease forwards;
+  .tile-inner img{
+    width:84%;
+    height:84%;
+    object-fit:contain;
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.28));
+  }
+  .cell.matched .tile-inner{
+    animation:collect .34s ease forwards;
   }
   @keyframes collect{
     0%{transform:scale(1); opacity:1; filter:brightness(1)}
-    35%{transform:scale(1.15); opacity:1; filter:brightness(1.3)}
-    100%{transform:scale(.2); opacity:0; filter:brightness(2)}
+    35%{transform:scale(1.15); opacity:1; filter:brightness(1.25)}
+    100%{transform:scale(.18); opacity:0; filter:brightness(2)}
   }
   .spark{
     position:absolute;
@@ -154,7 +180,7 @@
     background:radial-gradient(circle, #fff7b3 0%, #ffc14d 40%, rgba(255,160,40,0) 70%);
     pointer-events:none;
     animation:fly .55s ease-out forwards;
-    z-index:5;
+    z-index:12;
   }
   @keyframes fly{
     from{transform:translate(0,0) scale(1); opacity:1}
@@ -193,6 +219,57 @@
     margin-top:10px;
     line-height:1.35;
   }
+  .overlay{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.7);
+    z-index:40;
+    padding:14px;
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    width:min(100%, 420px);
+    background:linear-gradient(180deg, #5d3f2a, #2b1c13);
+    border:2px solid #a97852;
+    border-radius:22px;
+    box-shadow:0 18px 40px rgba(0,0,0,.45);
+    padding:20px 18px;
+    text-align:center;
+  }
+  .modal-avatar{
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    background:#fff6ea;
+    margin:0 auto 12px;
+    overflow:hidden;
+    border:3px solid rgba(255,255,255,.25);
+    box-shadow:0 10px 18px rgba(0,0,0,.28);
+  }
+  .modal-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .modal h3{
+    margin:0 0 10px;
+    font-size:28px;
+    color:#ffd07a;
+  }
+  .modal p{
+    margin:0 0 16px;
+    line-height:1.4;
+    font-size:17px;
+  }
+  .modal button{
+    background:linear-gradient(180deg,#ffb64a,#df7f1a);
+    padding:14px 20px;
+    min-width:180px;
+    font-size:18px;
+  }
   @media (max-width:520px){
     :root{
       --tile: calc((100vw - 28px - 5 * 8px) / 6);
@@ -209,8 +286,11 @@
   <div class="title">🚪 Завод дверей</div>
 
   <div class="boss">
-    <div class="label">Бригадир</div>
-    <div class="line" id="bossLine">Начали смену. Гони двери!</div>
+    <div class="boss-avatar"><img id="bossAvatarSmall" alt="Бригадир" /></div>
+    <div>
+      <div class="label">Бригадир</div>
+      <div class="line" id="bossLine">Начали смену. Гони двери!</div>
+    </div>
   </div>
 
   <div class="stats">
@@ -232,66 +312,51 @@
 
   <div class="help">
     Собирай 3+ одинаковые двери. Если на поле не останется ходов, игра сама перемешает двери.
-    Источники картинок — открытые файлы Wikimedia Commons и CC0-иконки SVG Repo; ссылки вынесены в код в блок <code>SOURCES</code>.
+    После уровня бригадир выйдет на экран и запустит следующую смену кнопкой «Погнали».
   </div>
 
   <div class="credits">
-    Один файл. Можно открыть локально как <code>index.html</code> или залить на хостинг.
+    Один файл. Все картинки дверей — дверные SVG с SVG Repo, где у выбранных иконок указана лицензия CC0.
+    Аватар бригадира — Construction Worker от OpenMoji под CC BY-SA 4.0.
+  </div>
+</div>
+
+<div class="overlay" id="levelOverlay">
+  <div class="modal">
+    <div class="modal-avatar"><img id="bossAvatarBig" alt="Бригадир" /></div>
+    <h3 id="overlayTitle">Молодец!</h3>
+    <p id="overlayText">Ты переходишь на новый уровень. Ты готов?</p>
+    <button id="goBtn">Погнали</button>
   </div>
 </div>
 
 <script>
 /*
-  SOURCES / LICENSES
-  - Wikimedia Commons reusable files:
-    https://commons.wikimedia.org/wiki/File:Red_Door.jpg
-    https://commons.wikimedia.org/wiki/File:Blue_Door.jpg
-    https://commons.wikimedia.org/wiki/File:Old_door.jpg
-    https://commons.wikimedia.org/wiki/File:Wooden_Door.JPG
-  - SVG Repo CC0 icon pages:
-    https://www.svgrepo.com/svg/77257/door-design
+  Asset notes:
+  - SVG Repo pages below show the selected door icons as CC0:
+    https://www.svgrepo.com/svg/322203/door
+    https://www.svgrepo.com/svg/456026/double-doors
     https://www.svgrepo.com/svg/151987/opened-door-aperture
+    https://www.svgrepo.com/svg/370014/door-leave
+    https://www.svgrepo.com/svg/142359/double-door-closed
     https://www.svgrepo.com/svg/494749/door-exit
-    https://www.svgrepo.com/svg/4437/house-door-key
-
-  For a single-file game we use direct image URLs from those open sources.
+  - Brigadier avatar:
+    OpenMoji construction worker page with CC BY-SA 4.0:
+    https://openmoji.org/library/emoji-1F477/
 */
 
 const SIZE = 6;
 const TARGET_START = 35;
 const TIME_START = 60;
+const BRIGADIER_SRC = "https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F477.svg";
 
 const TILE_TYPES = [
-  {
-    id: "redDoor",
-    name: "Красная дверь",
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Red%20Door.jpg?width=256"
-  },
-  {
-    id: "blueDoor",
-    name: "Синяя дверь",
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20Door.jpg?width=256"
-  },
-  {
-    id: "oldDoor",
-    name: "Старая дверь",
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Old%20door.jpg?width=256"
-  },
-  {
-    id: "woodDoor",
-    name: "Деревянная дверь",
-    src: "https://commons.wikimedia.org/wiki/Special:FilePath/Wooden%20Door.JPG?width=256"
-  },
-  {
-    id: "iconDoor",
-    name: "Иконка двери",
-    src: "https://www.svgrepo.com/show/77257/door-design.svg"
-  },
-  {
-    id: "iconExit",
-    name: "Выход",
-    src: "https://www.svgrepo.com/show/494749/door-exit.svg"
-  }
+  { id:"doorA", name:"Door A", src:"https://www.svgrepo.com/show/322203/door.svg", c1:"#ffddae", c2:"#b06e32" },
+  { id:"doorB", name:"Door B", src:"https://www.svgrepo.com/show/456026/double-doors.svg", c1:"#ffd4d4", c2:"#bf4a4a" },
+  { id:"doorC", name:"Door C", src:"https://www.svgrepo.com/show/151987/opened-door-aperture.svg", c1:"#d7ecff", c2:"#4d84c5" },
+  { id:"doorD", name:"Door D", src:"https://www.svgrepo.com/show/370014/door-leave.svg", c1:"#d8ffd7", c2:"#5ba05f" },
+  { id:"doorE", name:"Door E", src:"https://www.svgrepo.com/show/142359/double-door-closed.svg", c1:"#e8dcff", c2:"#7e58be" },
+  { id:"doorF", name:"Door F", src:"https://www.svgrepo.com/show/494749/door-exit.svg", c1:"#fff1c7", c2:"#b79d30" }
 ];
 
 const TEXTS = {
@@ -327,11 +392,6 @@ const TEXTS = {
       "Застой в цеху. Сейчас раскидаем двери заново.",
       "Поле умерло. Делаю перестановку."
     ],
-    levelUp: [
-      "План закрыл. Переходим дальше.",
-      "Уровень сделал. Теперь будет сложнее.",
-      "Неплохо. Следующая смена жёстче."
-    ],
     timeLow: [
       "Время душит, быстрее!",
       "Шевелись, смена горит!",
@@ -352,6 +412,11 @@ const TEXTS = {
       "План завален. Позорище.",
       "Время вышло. Цех недоволен."
     ]
+  },
+  overlay: {
+    title: "Молодец!",
+    text: "Ты переходишь на новый уровень. Ты готов?",
+    button: "Погнали"
   }
 };
 
@@ -379,8 +444,20 @@ const els = {
   coins: document.getElementById("coinsValue"),
   bombBtn: document.getElementById("bombBtn"),
   lineBtn: document.getElementById("lineBtn"),
-  timeBtn: document.getElementById("timeBtn")
+  timeBtn: document.getElementById("timeBtn"),
+  overlay: document.getElementById("levelOverlay"),
+  overlayTitle: document.getElementById("overlayTitle"),
+  overlayText: document.getElementById("overlayText"),
+  goBtn: document.getElementById("goBtn"),
+  bossAvatarSmall: document.getElementById("bossAvatarSmall"),
+  bossAvatarBig: document.getElementById("bossAvatarBig")
 };
+
+els.bossAvatarSmall.src = BRIGADIER_SRC;
+els.bossAvatarBig.src = BRIGADIER_SRC;
+els.overlayTitle.textContent = TEXTS.overlay.title;
+els.overlayText.textContent = TEXTS.overlay.text;
+els.goBtn.textContent = TEXTS.overlay.button;
 
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function say(type){
@@ -411,7 +488,7 @@ function removeInitialMatches(board){
       for (const i of group) board[i] = randomType();
     }
     safety++;
-    if (safety > 50) break;
+    if (safety > 80) break;
   }
 }
 
@@ -425,12 +502,17 @@ function renderBoard(matched = new Set()){
     cell.dataset.index = i;
 
     const tile = tileById(id);
-    const img = document.createElement("div");
-    img.className = "tile-img";
-    img.style.backgroundImage = `url("${tile.src}")`;
-    img.title = tile.name;
+    const inner = document.createElement("div");
+    inner.className = "tile-inner";
+    inner.style.setProperty("--c1", tile.c1);
+    inner.style.setProperty("--c2", tile.c2);
 
-    cell.appendChild(img);
+    const img = document.createElement("img");
+    img.src = tile.src;
+    img.alt = tile.name;
+    inner.appendChild(img);
+    cell.appendChild(inner);
+
     cell.addEventListener("click", () => onCellClick(i));
     els.grid.appendChild(cell);
   });
@@ -455,15 +537,13 @@ function swap(board, a, b){
 function findMatches(board){
   const groups = [];
 
-  // horizontal
   for (let y = 0; y < SIZE; y++) {
     let run = [idx(0,y)];
     for (let x = 1; x < SIZE; x++) {
       const prev = board[idx(x-1,y)];
       const cur = board[idx(x,y)];
-      if (cur === prev) {
-        run.push(idx(x,y));
-      } else {
+      if (cur === prev) run.push(idx(x,y));
+      else {
         if (run.length >= 3) groups.push([...run]);
         run = [idx(x,y)];
       }
@@ -471,15 +551,13 @@ function findMatches(board){
     if (run.length >= 3) groups.push([...run]);
   }
 
-  // vertical
   for (let x = 0; x < SIZE; x++) {
     let run = [idx(x,0)];
     for (let y = 1; y < SIZE; y++) {
       const prev = board[idx(x,y-1)];
       const cur = board[idx(x,y)];
-      if (cur === prev) {
-        run.push(idx(x,y));
-      } else {
+      if (cur === prev) run.push(idx(x,y));
+      else {
         if (run.length >= 3) groups.push([...run]);
         run = [idx(x,y)];
       }
@@ -526,7 +604,6 @@ function hasAnyMoves(board){
 function shuffleBoard(){
   say("shuffle");
   state.isBusy = true;
-
   const cells = [...els.grid.children];
   cells.forEach(c => c.classList.add("shuffling"));
 
@@ -580,7 +657,7 @@ async function resolveBoard(){
     else say("match");
 
     matched.forEach(i => createSparkles(i));
-    await wait(320);
+    await wait(340);
 
     for (const i of matched) state.board[i] = null;
     applyGravity(state.board);
@@ -594,21 +671,38 @@ async function resolveBoard(){
 
   if (state.score >= state.target) {
     clearInterval(state.timer);
-    say("levelUp");
-    await wait(650);
-    state.level += 1;
-    state.target += 15;
-    state.time = TIME_START;
-    state.lastLowTimeMark = false;
-    state.board = createRandomBoard();
-    renderBoard();
-    startTimer();
+    await showLevelOverlay();
     return;
   }
 
   if (!hasAnyMoves(state.board)) {
     shuffleBoard();
   }
+}
+
+function showLevelOverlay(){
+  return new Promise(resolve => {
+    state.isBusy = true;
+    els.overlay.classList.add("show");
+
+    const clickHandler = () => {
+      els.goBtn.removeEventListener("click", clickHandler);
+      els.overlay.classList.remove("show");
+      state.level += 1;
+      state.target += 15;
+      state.time = TIME_START;
+      state.lastLowTimeMark = false;
+      state.selected = null;
+      state.board = createRandomBoard();
+      renderBoard();
+      say("start");
+      state.isBusy = false;
+      startTimer();
+      resolve();
+    };
+
+    els.goBtn.addEventListener("click", clickHandler);
+  });
 }
 
 async function onCellClick(i){
@@ -730,6 +824,7 @@ function startTimer(){
         state.lines = 1;
         state.isBusy = false;
         state.lastLowTimeMark = false;
+        state.selected = null;
         state.board = createRandomBoard();
         say("start");
         renderBoard();
@@ -739,9 +834,7 @@ function startTimer(){
   }, 1000);
 }
 
-function wait(ms){
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+function wait(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function init(){
   state.board = createRandomBoard();
