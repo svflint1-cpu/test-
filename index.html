@@ -116,20 +116,20 @@
     display:none;
     align-items:center;
     justify-content:center;
-    background:rgba(0,0,0,.78);
-    z-index:60;
+    background:rgba(0,0,0,.82);
+    z-index:80;
     padding:14px;
   }
-  .intro-overlay.show{display:flex;pointer-events:auto}
-  .intro-modal{position:relative;z-index:81;
+  .intro-overlay.show{display:flex}
+  .intro-modal{
     width:min(100%,460px);
     background:linear-gradient(180deg,#5d3f2a,#2b1c13);
     border:2px solid #a97852;
     border-radius:24px;
     box-shadow:0 18px 40px rgba(0,0,0,.45);
     padding:20px 18px;
-    animation:modalIn .35s ease-out;
     text-align:left;
+    position:relative;
   }
   .intro-top{
     display:flex;
@@ -177,7 +177,7 @@
     font-size:16px;
   }
   .intro-rules b{color:#ffd07a}
-  .intro-btn{position:relative;z-index:80;pointer-events:auto;
+  .intro-btn{
     width:100%;
     background:linear-gradient(180deg,#ffb64a,#df7f1a);
     padding:14px 20px;
@@ -217,7 +217,7 @@
     <button id="buyLineBtn">🛒 Купить линию (12)</button>
     <button id="rewardBtn" class="reward-btn">🎥 +50 кристаллов за видео</button>
   </div>
-  <div class="help">Собирай 3+ одинаковые двери в ряд, делай серии и набирай как можно больше дверей за смену.</div>
+  <div class="help">Собирай 3+ одинаковых дверей .</div>
   <div class="credits">Создано при помощи "Чайки" </div>
 
   <div class="help" style="margin-top:12px">
@@ -240,10 +240,10 @@
     <div class="intro-rules">
       <b>Правила игры:</b><br>
       Собирай <b>3 и больше одинаковых дверей подряд</b> по горизонтали или вертикали.<br>
-      Чем больше серий — тем больше дверей и кристаллов ты заберёшь.<br>
-      Твоя задача — <b>собрать как можно больше дверей</b> и не завалить смену.
+      Чем больше серий — тем больше дверей и кристаллов заберёшь.<br>
+      Твоя задача — <b>набрать как можно больше дверей</b> и не завалить смену.
     </div>
-    <button class="intro-btn" id="introStartBtn" type="button" onclick="startFromIntro()">Понял, погнали</button>
+    <button class="intro-btn" id="introStartBtn" type="button">Понял, погнали</button>
   </div>
 </div>
 
@@ -694,8 +694,7 @@ function resetGame(){
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 function startFromIntro(){
-  const overlay = document.getElementById("introOverlay");
-  if(overlay) overlay.classList.remove("show");
+  if(els.introOverlay) els.introOverlay.classList.remove("show");
   state.isBusy = false;
   say("start");
   renderBoard();
@@ -703,21 +702,14 @@ function startFromIntro(){
 }
 
 async function init(){
-  setTimeout(()=>{const el=document.getElementById("bossAvatarIntro"); if(el) el.src=BRIGADIER_SRC;},100);
   if(!loadGame()) state.board=createRandomBoard();
-  say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard();
+  say("start"); renderBoard(); await initOnlineLeaderboard(); await renderLeaderboard(); if(els.introOverlay) els.introOverlay.classList.add("show");
   els.bombBtn.onclick=()=>bombAt(state.selected ?? Math.floor(Math.random()*state.board.length));
   els.lineBtn.onclick=()=>lineClearRow(state.selected!==null ? xy(state.selected).y : Math.floor(Math.random()*SIZE));
-  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
+  els.timeBtn.onclick=buyTime; els.buyBombBtn.onclick=buyBomb; els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd; if(els.introStartBtn) els.introStartBtn.onclick=startFromIntro;
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
 }
 init();
-document.addEventListener("DOMContentLoaded", ()=>{
-  const btn = document.getElementById("introStartBtn");
-  if(btn) btn.onclick = startFromIntro;
-  const introAvatar = document.getElementById("bossAvatarIntro");
-  if(introAvatar) introAvatar.src = BRIGADIER_SRC;
-});
 </script>
 </body>
 </html>
