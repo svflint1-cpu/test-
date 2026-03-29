@@ -294,7 +294,7 @@
 </div>
 
 <script>
-const STORAGE_KEY="door_factory_save_v6_special_beer", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
+const STORAGE_KEY="door_factory_save_v6_special_beer", BACKUP_STORAGE_KEY=STORAGE_KEY+"_backup", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
 function getTargetForLevel(level){
   let total = 15;
   for(let i = 2; i <= level; i++){
@@ -358,6 +358,7 @@ const tileById=id=>SPECIAL_TILES[id] || TILE_TYPES.find(t=>t.id===id);
 
 
 const LEADERBOARD_KEY="door_factory_leaderboard_v1";
+const PENDING_ONLINE_SCORE_KEY="door_factory_pending_online_score_v1";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBYLA9pD_5qOZv6dU78vMwKDVxTgEOeDuo",
   authDomain: "dveryreyting.firebaseapp.com",
@@ -442,6 +443,7 @@ async function initOnlineLeaderboard(){
 
     window.__fb = { firestoreMod, app };
     leaderboardMode = "online";
+    await flushPendingOnlineEntry();
     await renderLeaderboard();
   }catch(e){
     console.error("Firebase init failed:", e);
@@ -449,14 +451,54 @@ async function initOnlineLeaderboard(){
   }
 }
 
-async function saveLeaderboardEntry(){
-  const entry = {
+function isEntryBetter(entry, oldData){
+  return (
+    (entry.level > (oldData?.level || 0)) ||
+    (entry.level === (oldData?.level || 0) && entry.score > (oldData?.score || 0)) ||
+    (entry.level === (oldData?.level || 0) && entry.score === (oldData?.score || 0) && entry.coins > (oldData?.coins || 0))
+  );
+}
+
+function getCurrentLeaderboardEntry(){
+  return {
     name: getPlayerName(),
     score: state.score,
     level: state.level,
     coins: state.coins,
     ts: Date.now()
   };
+}
+
+function rememberPendingOnlineEntry(entry){
+  try{
+    const raw = localStorage.getItem(PENDING_ONLINE_SCORE_KEY);
+    const oldEntry = raw ? JSON.parse(raw) : null;
+    if(!oldEntry || isEntryBetter(entry, oldEntry)){
+      localStorage.setItem(PENDING_ONLINE_SCORE_KEY, JSON.stringify(entry));
+    }
+  }catch(e){}
+}
+
+async function flushPendingOnlineEntry(){
+  try{
+    const raw = localStorage.getItem(PENDING_ONLINE_SCORE_KEY);
+    if(!raw) return false;
+    const pendingEntry = JSON.parse(raw);
+    const ok = await saveLeaderboardEntry(pendingEntry, true);
+    if(ok){
+      localStorage.removeItem(PENDING_ONLINE_SCORE_KEY);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+async function saveLeaderboardEntry(entryOverride=null, skipRemember=false){
+  const entry = entryOverride || getCurrentLeaderboardEntry();
+
+  if(!skipRemember){
+    rememberPendingOnlineEntry(entry);
+  }
 
   if (leaderboardMode === "online" && onlineDb && window.__fb?.firestoreMod) {
     try{
@@ -467,19 +509,20 @@ async function saveLeaderboardEntry(){
 
       if (!oldSnap.exists()) {
         await setDoc(ref, { ...entry, playerId });
-        return;
+        if(!skipRemember){
+          try{ localStorage.removeItem(PENDING_ONLINE_SCORE_KEY); }catch(e){}
+        }
+        return true;
       }
 
       const oldData = oldSnap.data();
-      const isBetter =
-        (entry.level > (oldData.level || 0)) ||
-        (entry.level === (oldData.level || 0) && entry.score > (oldData.score || 0)) ||
-        (entry.level === (oldData.level || 0) && entry.score === (oldData.score || 0) && entry.coins > (oldData.coins || 0));
-
-      if (isBetter) {
+      if (isEntryBetter(entry, oldData)) {
         await setDoc(ref, { ...entry, playerId });
       }
-      return;
+      if(!skipRemember){
+        try{ localStorage.removeItem(PENDING_ONLINE_SCORE_KEY); }catch(e){}
+      }
+      return true;
     }catch(e){
       console.error("Online save failed, using local fallback:", e);
     }
@@ -496,19 +539,15 @@ async function saveLeaderboardEntry(){
     lb.push(localEntry);
   } else {
     const oldData = lb[index];
-    const isBetter =
-      (localEntry.level > (oldData.level || 0)) ||
-      (localEntry.level === (oldData.level || 0) && localEntry.score > (oldData.score || 0)) ||
-      (localEntry.level === (oldData.level || 0) && localEntry.score === (oldData.score || 0) && localEntry.coins > (oldData.coins || 0));
-
-    if (isBetter) {
+    if (isEntryBetter(localEntry, oldData)) {
       lb[index] = localEntry;
     }
   }
 
-  lb.sort((a,b)=> (b.level - a.level) || (b.score - a.score) || (b.coins - a.coins) || (a.ts - b.ts));
+  lb.sort((a,b)=>(b.level - a.level) || (b.score - a.score) || (b.coins - a.coins) || (a.ts - b.ts));
   lb = lb.slice(0,50);
   localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
+  return leaderboardMode !== "online";
 }
 
 async function renderLeaderboard(){
@@ -588,23 +627,56 @@ async function watchRewardedAd(){
 }
 
 function saveGame(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    board:state.board, selected:state.selected, score:state.score, level:state.level, target:state.target,
-    time:state.time, coins:state.coins, lastLowTimeMark:state.lastLowTimeMark
-  }));
+  const data = {
+    board: state.board,
+    selected: state.selected,
+    score: state.score,
+    level: state.level,
+    target: state.target,
+    time: state.time,
+    coins: state.coins,
+    lastLowTimeMark: state.lastLowTimeMark,
+    savedAt: Date.now()
+  };
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  try{ localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(data)); }catch(e){}
 }
+
+function restoreStateFromData(d){
+  if(!d || !Array.isArray(d.board) || d.board.length !== SIZE*SIZE) return false;
+  const validIds = new Set(TILE_TYPES.map(t => t.id));
+  const repairedBoard = d.board.map(id => validIds.has(id) ? id : randomType());
+
+  state.board = repairedBoard;
+  state.selected = typeof d.selected === "number" ? d.selected : null;
+  state.score = Number(d.score) || 0;
+  state.level = Math.max(1, Number(d.level) || 1);
+  state.target = Number(d.target) || getTargetForLevel(state.level);
+  state.time = Math.max(1, Number(d.time) || TIME_START);
+  state.coins = Math.max(0, Number(d.coins) || 0);
+  state.lastLowTimeMark = !!d.lastLowTimeMark;
+  state.activeTool = null;
+
+  if(!hasAnyMoves(state.board)){
+    state.board = createRandomBoard();
+  }
+  return true;
+}
+
 function loadGame(){
-  const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return false;
-  try{
-    const d=JSON.parse(raw);
-    if(!Array.isArray(d.board)||d.board.length!==SIZE*SIZE) return false;
-    const validIds = new Set(TILE_TYPES.map(t => t.id));
-    if(!d.board.every(id => validIds.has(id))) return false;
-    state.board=d.board; state.selected=typeof d.selected==="number"?d.selected:null; state.score=Number(d.score)||0; state.level=Number(d.level)||1;
-    state.target=Number(d.target)||TARGET_START; state.time=Math.max(1,Number(d.time)||TIME_START); state.coins=Number(d.coins)||0;
-    state.lastLowTimeMark=!!d.lastLowTimeMark; state.activeTool=null;
-    return true;
-  }catch{return false;}
+  const candidates = [
+    localStorage.getItem(STORAGE_KEY),
+    localStorage.getItem(BACKUP_STORAGE_KEY)
+  ];
+
+  for(const raw of candidates){
+    if(!raw) continue;
+    try{
+      const d = JSON.parse(raw);
+      if(restoreStateFromData(d)) return true;
+    }catch(e){}
+  }
+  return false;
 }
 function createRandomBoard(){
   let board; do{ board=Array.from({length:SIZE*SIZE}, ()=>randomType()); removeInitialMatches(board); } while(!hasAnyMoves(board));
@@ -766,7 +838,7 @@ async function resolveBoard(preferredSpecialCells=[]){
 function showLevelOverlay(){
   return new Promise(resolve=>{
     state.isBusy=true; els.overlayTitle.textContent="Молодец!"; els.overlayText.textContent=`Следующий уровень: ${state.level + 1}. Нужно добраться до ${getTargetForLevel(state.level + 1)} дверей.`; els.overlay.classList.add("show");
-    const clickHandler=()=>{ els.goBtn.removeEventListener("click",clickHandler); els.overlay.classList.remove("show"); state.level+=1; state.target=getTargetForLevel(state.level); state.time=TIME_START; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); renderBoard(); say("start"); state.isBusy=false; startTimer(); resolve(); };
+    const clickHandler=async()=>{ els.goBtn.removeEventListener("click",clickHandler); els.overlay.classList.remove("show"); state.level+=1; state.target=getTargetForLevel(state.level); state.time=TIME_START; state.lastLowTimeMark=false; state.selected=null; state.board=createRandomBoard(); renderBoard(); try{ await saveLeaderboardEntry(); await renderLeaderboard(); }catch(e){} say("start"); state.isBusy=false; startTimer(); resolve(); };
     els.goBtn.addEventListener("click", clickHandler);
   });
 }
@@ -864,8 +936,16 @@ function showGameOverOverlay(){
   const clickHandler=()=>{ els.restartBtn.removeEventListener("click",clickHandler); els.gameOverOverlay.classList.remove("show"); resetGame(); };
   els.restartBtn.addEventListener("click", clickHandler);
 }
+function persistOnExit(){
+  try{ saveGame(); }catch(e){}
+  try{ rememberPendingOnlineEntry(getCurrentLeaderboardEntry()); }catch(e){}
+  try{ saveLeaderboardEntry(); }catch(e){}
+}
+
 function resetGame(){
-  localStorage.removeItem(STORAGE_KEY); state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.board=createRandomBoard(); say("start"); renderBoard(); startTimer();
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  try{ localStorage.removeItem(BACKUP_STORAGE_KEY); }catch(e){}
+  state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.isBusy=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.board=createRandomBoard(); say("start"); renderBoard(); saveGame(); startTimer();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
