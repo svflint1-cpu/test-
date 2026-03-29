@@ -298,7 +298,7 @@ const STORAGE_KEY="door_factory_save_v6_special_beer", BACKUP_STORAGE_KEY=STORAG
 function getTargetForLevel(level){
   let total = 15;
   for(let i = 2; i <= level; i++){
-    total += (14 + i); // +16, +17, +18... to totals: 15, 31, 48, 66...
+    total += (12 + i * 3); // +18, +21, +24... => 15, 33, 54, 78...
   }
   return total;
 }
