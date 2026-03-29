@@ -218,23 +218,23 @@
     <div class="stat"><div class="k">Уровень</div><div class="v" id="levelValue">1</div></div>
     <div class="stat"><div class="k">Собрано</div><div class="v" id="scoreValue">0/35</div></div>
     <div class="stat"><div class="k">Время</div><div class="v" id="timeValue">60</div></div>
-    <div class="stat"><div class="k">Кристаллы</div><div class="v" id="coinsValue">0</div></div>
+    <div class="stat"><div class="k">Деньги</div><div class="v" id="coinsValue">0</div></div>
   </div>
   <div class="board-wrap"><div class="grid" id="grid"></div></div>
   <div class="action-panels">
     <div class="controls">
       <button class="tool-btn btn-bomb" id="bombBtn">
-        <span class="btn-price" id="bombCount">10 💎</span>
+        <span class="btn-price" id="bombCount">10 ₴</span>
         <span class="btn-main">💣 Бомба 3×3</span>
         <span class="btn-sub">Нажал → ткнул по клетке → бах</span>
       </button>
       <button class="tool-btn btn-line" id="lineBtn">
-        <span class="btn-price" id="lineCount">12 💎</span>
+        <span class="btn-price" id="lineCount">12 ₴</span>
         <span class="btn-main">⚡ Линия</span>
         <span class="btn-sub">Нажал → ткнул в ряд → снос всей полосы</span>
       </button>
       <button class="tool-btn btn-time" id="timeBtn">
-        <span class="btn-price">8 💎</span>
+        <span class="btn-price">8 ₴</span>
         <span class="btn-main">⏱ +20 секунд</span>
         <span class="btn-sub">Покупается и применяется сразу</span>
       </button>
@@ -242,7 +242,7 @@
     <div class="shop">
       <button id="rewardBtn" class="reward-btn">
         <span class="btn-main">🎥 Смотреть видео</span>
-        <span class="btn-sub">Получить +50 кристаллов</span>
+        <span class="btn-sub">Получить +50 ₴</span>
       </button>
     </div>
     <div class="action-hint" id="toolHint">Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.</div>
@@ -251,8 +251,9 @@
   <div class="credits">Создано при помощи "Чайки" </div>
 
   <div class="help" style="margin-top:12px">
-    <div style="font-weight:800;margin-bottom:8px">🏆 Рейтинг игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
+    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 50 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
     <div id="leaderboard"></div>
+    <div style="opacity:.7;font-size:12px;margin-top:8px">Показываются лучшие 50 игроков по уровню, дверям и деньгам.</div>
   </div>
 
 </div>
@@ -270,7 +271,7 @@
     <div class="intro-rules">
       <b>Правила игры:</b><br>
       Собирай <b>3 и больше одинаковых дверей подряд</b> по горизонтали или вертикали.<br>
-      Чем больше серий — тем больше дверей и кристаллов заберёшь.<br>
+      Чем больше серий — тем больше дверей и денег заберёшь.<br>
       Твоя задача — <b>набрать как можно больше дверей</b> и не завалить смену.
     </div>
     <button class="intro-btn" id="introStartBtn" type="button" onclick="startFromIntro()">Понял, погнали</button>
@@ -291,13 +292,13 @@
     <div class="modal-avatar"><img id="bossAvatarGameOver" alt="Бригадир"></div>
     <h3 id="gameOverTitle">Мы все проебали</h3>
     <p id="gameOverText">Смена завалена. Вот что ты успел собрать:</p>
-    <p id="gameOverStats" style="font-size:18px;font-weight:700;margin-top:-4px;">Собрано дверей: 0<br>Кристаллы: 0<br>Уровень: 1</p>
+    <p id="gameOverStats" style="font-size:18px;font-weight:700;margin-top:-4px;">Собрано дверей: 0<br>Деньги: 0<br>Уровень: 1</p>
     <button id="restartBtn">Начать заново</button>
   </div>
 </div>
 
 <script>
-const STORAGE_KEY="door_factory_save_v6_special_beer", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
+const STORAGE_KEY="door_factory_save_v7_money_top50", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
 function getTargetForLevel(level){
   let total = 15;
   for(let i = 2; i <= level; i++){
@@ -325,7 +326,7 @@ const TEXTS={boss:{
   useLine:["Чистим ряд подчистую.","Сметай линию, не жалей.","Один ряд под нож."],
   buyBomb:["Бомбу купил. Только не промахнись.","Ладно, держи бомбу.","Новая бомба на складе."],
   buyLine:["Линию закупили. Пользуйся с умом.","Есть ещё один линейный заряд.","Держи линию, но без дичи."],
-  noCoins:["Кристаллов не хватает.","Ты ещё не нафармил на это.","Сначала заработай кристаллы."],
+  noCoins:["Не хватает денег.","Ты ещё не нафармил на это.","Сначала заработай бабки."],
   gameOver:["Смена провалена. Ноль премии.","План завален. Позорище.","Время вышло. Цех недоволен."],
   specialSpawn:["О, бутылочка под пиво пошла в дело.","Спецбутылка готова. Двигай её с умом.","Вот это подгон — бутылка на поле."],
   specialBoom:["Бутылка рванула как надо.","Вот это хлопок по складу.","Спецбутылка расчистила поле."]
@@ -360,7 +361,7 @@ const tileById=id=>SPECIAL_TILES[id] || TILE_TYPES.find(t=>t.id===id);
 
 
 
-const LEADERBOARD_KEY="door_factory_leaderboard_v1";
+const LEADERBOARD_KEY="door_factory_leaderboard_v2_top50";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBYLA9pD_5qOZv6dU78vMwKDVxTgEOeDuo",
   authDomain: "dveryreyting.firebaseapp.com",
@@ -510,7 +511,7 @@ async function saveLeaderboardEntry(){
   }
 
   lb.sort((a,b)=> (b.level - a.level) || (b.score - a.score) || (b.coins - a.coins) || (a.ts - b.ts));
-  lb = lb.slice(0,10);
+  lb = lb.slice(0,50);
   localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
 }
 
@@ -526,12 +527,13 @@ async function renderLeaderboard(){
         orderBy("level", "desc"),
         orderBy("score", "desc"),
         orderBy("coins", "desc"),
-        limit(10)
+        orderBy("ts", "asc"),
+        limit(50)
       );
       const snap = await getDocs(q);
       const lb = snap.docs.map(d => d.data());
       if(!lb.length){
-        els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
+        els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену, и здесь появится топ-50.</div>';
         return;
       }
       els.leaderboard.innerHTML = lb.map((p, i) => {
@@ -539,7 +541,7 @@ async function renderLeaderboard(){
         const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
         return `<div class="lb-row ${cls}">
           <span>${medal} ${i+1}. ${p.name || "Игрок"}</span>
-          <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💎 ${p.coins || 0}</span>
+          <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💵 ${p.coins || 0}</span>
         </div>`;
       }).join("");
       return;
@@ -551,7 +553,7 @@ async function renderLeaderboard(){
   let lb = [];
   try{ lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }catch(e){}
   if(!lb.length){
-    els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
+    els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену, и здесь появится топ-50.</div>';
     return;
   }
   els.leaderboard.innerHTML = lb.map((p, i) => {
@@ -559,7 +561,7 @@ async function renderLeaderboard(){
     const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
     return `<div class="lb-row ${cls}">
       <span>${medal} ${i+1}. ${p.name}</span>
-      <span>ур. ${p.level} · ${p.score} дверей · 💎 ${p.coins}</span>
+      <span>ур. ${p.level} · ${p.score} дверей · 💵 ${p.coins}</span>
     </div>`;
   }).join("");
 }
@@ -574,7 +576,7 @@ async function watchRewardedAd(){
       const rewarded = await window.showDoorRewardedAd();
       if(rewarded){
         state.coins += REWARDED_COINS;
-        els.boss.textContent = `Бригадир: Забрал +${REWARDED_COINS} кристаллов. Работай дальше.`;
+        els.boss.textContent = `Бригадир: Забрал +${REWARDED_COINS} ₴. Работай дальше.`;
         renderBoard();
         return;
       }
@@ -583,7 +585,7 @@ async function watchRewardedAd(){
     }
 
     els.boss.textContent = "Бригадир: Для настоящей награды подключи рекламный SDK или Telegram Stars.";
-    alert("Кнопка готова под монетизацию. Чтобы выдавать реальные +50 кристаллов за видео, нужно подключить рекламный SDK/провайдера и передать результат через window.showDoorRewardedAd().");
+    alert("Кнопка готова под монетизацию. Чтобы выдавать реальные +50 ₴ за видео, нужно подключить рекламный SDK/провайдера и передать результат через window.showDoorRewardedAd().");
   }catch(e){
     console.error("Rewarded ad hook failed:", e);
     els.boss.textContent = "Бригадир: С рекламой что-то пошло не так.";
@@ -632,11 +634,11 @@ function updateToolUI(){
   const active = state.activeTool;
   els.bombBtn.classList.toggle("active", active === "bomb");
   els.lineBtn.classList.toggle("active", active === "line");
-  if(els.bombCount) els.bombCount.textContent = `${BOMB_COST} 💎`;
-  if(els.lineCount) els.lineCount.textContent = `${LINE_COST} 💎`;
+  if(els.bombCount) els.bombCount.textContent = `${BOMB_COST} ₴`;
+  if(els.lineCount) els.lineCount.textContent = `${LINE_COST} ₴`;
   if(els.toolHint){
-    if(active === "bomb") els.toolHint.textContent = `Бомба готова: ткни по клетке, спишется ${BOMB_COST} 💎 и рванёт квадрат 3×3.`;
-    else if(active === "line") els.toolHint.textContent = `Линия готова: ткни по любой клетке ряда, спишется ${LINE_COST} 💎 и снесёт всю полосу.`;
+    if(active === "bomb") els.toolHint.textContent = `Бомба готова: ткни по клетке, спишется ${BOMB_COST} ₴ и рванёт квадрат 3×3.`;
+    else if(active === "line") els.toolHint.textContent = `Линия готова: ткни по любой клетке ряда, спишется ${LINE_COST} ₴ и снесёт всю полосу.`;
     else els.toolHint.textContent = "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
   }
 }
@@ -862,7 +864,7 @@ function startTimer(){
 function showGameOverOverlay(){
   els.gameOverTitle.textContent="Мы все проебали";
   els.gameOverText.textContent="Смена завалена. Вот что ты успел собрать:";
-  els.gameOverStats.innerHTML=`Собрано дверей: ${state.score}<br>Кристаллы: ${state.coins}<br>Уровень: ${state.level}`;
+  els.gameOverStats.innerHTML=`Собрано дверей: ${state.score}<br>Деньги: ${state.coins}<br>Уровень: ${state.level}`;
   els.gameOverOverlay.classList.add("show");
   const clickHandler=()=>{ els.restartBtn.removeEventListener("click",clickHandler); els.gameOverOverlay.classList.remove("show"); resetGame(); };
   els.restartBtn.addEventListener("click", clickHandler);
