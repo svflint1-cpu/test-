@@ -22,6 +22,16 @@
   window.addEventListener('resize', fitBoardToScreen);
 })();
 
+
+document.addEventListener("DOMContentLoaded", function(){
+  if(els.pauseBtn){
+    els.pauseBtn.onclick = function(){
+      if(state.isPaused) resumeGame();
+      else pauseGame();
+    };
+  }
+});
+
 </script>
 <style>
   :root{
@@ -50,7 +60,19 @@
   margin:0 auto;
 }
   .title{text-align:center;font-size:28px;font-weight:900;margin:4px 0 10px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,170,80,.35)}
-  .boss{position:relative;display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#5b3a25,#2f1f15);border:2px solid #8d613f;border-radius:18px;padding:10px 54px 10px 14px;min-height:88px;box-shadow:0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);margin-bottom:10px}
+  .boss{
+  position:relative;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  background:linear-gradient(180deg,#5b3a25,#2f1f15);
+  border:2px solid #8d613f;
+  border-radius:18px;
+  padding:10px 64px 10px 14px;
+  min-height:88px;
+  box-shadow:0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
+  margin-bottom:10px;
+}
   .boss-avatar,.modal-avatar{border-radius:50%;background:#fff5e8;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .boss-avatar{width:60px;height:60px;flex:0 0 60px;border:2px solid rgba(255,255,255,.25);box-shadow:0 6px 12px rgba(0,0,0,.25)}
   .boss-avatar img,.modal-avatar img{width:100%;height:100%;object-fit:cover;object-position:center 18%}
@@ -266,19 +288,20 @@
   }
   .boss > .pause-icon-btn{
     position:absolute;
-    top:12px;
     right:12px;
-    width:32px;
-    height:32px;
-    min-width:32px;
-    min-height:32px;
+    top:50%;
+    transform:translateY(-50%);
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
     padding:0;
     margin:0;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;
-    background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.18));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
     color:#ffe3a6;
-    font-size:15px;
+    font-size:16px;
     font-weight:900;
     line-height:1;
     display:flex;
@@ -287,29 +310,36 @@
     cursor:pointer;
     z-index:30;
     box-shadow:
-      0 6px 14px rgba(0,0,0,.24),
+      0 8px 18px rgba(0,0,0,.24),
       inset 0 1px 0 rgba(255,255,255,.10);
     transition:transform .18s ease, filter .18s ease, box-shadow .18s ease, background .18s ease;
-    animation:pausePulse 1.8s ease-in-out infinite;
+  }
+  .boss > .pause-icon-btn::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 48%);
+    pointer-events:none;
   }
   .boss > .pause-icon-btn:hover{
-    transform:translateY(-1px) scale(1.05);
+    transform:translateY(-50%) scale(1.04);
     filter:brightness(1.08);
     box-shadow:
-      0 8px 18px rgba(0,0,0,.28),
+      0 10px 22px rgba(0,0,0,.28),
       inset 0 1px 0 rgba(255,255,255,.12),
-      0 0 12px rgba(255,196,90,.12);
+      0 0 14px rgba(255,204,120,.12);
   }
   .boss > .pause-icon-btn:active{
-    transform:translateY(1px) scale(.97);
+    transform:translateY(-50%) scale(.97);
   }
   .boss > .pause-icon-btn.paused{
-    background:linear-gradient(180deg, rgba(255,214,130,.24), rgba(88,52,22,.46));
-    color:#fff1cb;
+    background:linear-gradient(180deg, rgba(255,212,120,.26), rgba(88,52,22,.42));
+    color:#fff4d1;
     box-shadow:
-      0 8px 18px rgba(0,0,0,.30),
-      inset 0 1px 0 rgba(255,255,255,.14),
-      0 0 14px rgba(255,196,90,.16);
+      0 10px 22px rgba(0,0,0,.30),
+      inset 0 1px 0 rgba(255,255,255,.12),
+      0 0 16px rgba(255,196,90,.16);
   }
   @keyframes pausePulse{
     0%,100%{
@@ -448,6 +478,14 @@
 
 
 @media (max-width: 560px){
+  .boss > .pause-icon-btn{
+    right:10px;
+    width:36px;
+    height:36px;
+    min-width:36px;
+    min-height:36px;
+    font-size:15px;
+  }
   .title{font-size:clamp(22px, 6.8vw, 30px)}
   .boss{padding:10px 50px 10px 12px}
   .boss-avatar{width:54px;height:54px;flex:0 0 54px}
@@ -624,7 +662,7 @@ const els={
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
   gameOverOverlay:document.getElementById("gameOverOverlay"), bossAvatarGameOver:document.getElementById("bossAvatarGameOver"),
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
-  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn")
+  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode"), pauseBtn:document.getElementById("pauseBtn"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn")
 };
 els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; const __introAvatar=document.getElementById("bossAvatarIntro"); if(__introAvatar) __introAvatar.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
@@ -993,6 +1031,7 @@ function updateToolUI(){
     els.pauseBtn.classList.toggle("paused", !!state.isPaused);
     els.pauseBtn.textContent = state.isPaused ? "▶" : "⏸";
     els.pauseBtn.setAttribute("aria-label", state.isPaused ? "Продолжить" : "Пауза");
+    els.pauseBtn.setAttribute("title", state.isPaused ? "Продолжить" : "Пауза");
   }
   if(els.toolHint){
     if(state.isPaused) els.toolHint.textContent = `Пауза включена: время стоит, поле заблокировано.`;
@@ -1344,9 +1383,10 @@ function pauseGame(){
     els.pauseBtn.classList.add("paused");
     els.pauseBtn.textContent = "▶";
     els.pauseBtn.setAttribute("aria-label","Продолжить");
+    els.pauseBtn.setAttribute("title","Продолжить");
   }
   if(els.grid) els.grid.classList.add("board-paused");
-  updateToolUI();
+  if(els.toolHint) els.toolHint.textContent = "Пауза включена: время стоит, поле заблокировано.";
   saveGame();
 }
 
@@ -1357,9 +1397,10 @@ function resumeGame(){
     els.pauseBtn.classList.remove("paused");
     els.pauseBtn.textContent = "⏸";
     els.pauseBtn.setAttribute("aria-label","Пауза");
+    els.pauseBtn.setAttribute("title","Пауза");
   }
   if(els.grid) els.grid.classList.remove("board-paused");
-  updateToolUI();
+  if(els.toolHint) els.toolHint.textContent = "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
   saveGame();
 }
 
