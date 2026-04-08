@@ -601,8 +601,8 @@ document.addEventListener("DOMContentLoaded", function(){
   <div class="credits">Create by pokleyka :) </div>
 
   <div class="help" style="margin-top:12px">
-    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 50 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
-    <div id="leaderboard"></div>
+    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 500 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
+    <div id="leaderboard" style="max-height:520px;overflow:auto;padding-right:4px"></div>
   </div>
 
 </div>
@@ -924,7 +924,7 @@ async function saveLeaderboardEntry(entryOverride=null, skipRemember=false){
   }
 
   lb.sort((a,b)=>(b.level - a.level) || (b.score - a.score) || (b.coins - a.coins) || (a.ts - b.ts));
-  lb = lb.slice(0,50);
+  lb = lb.slice(0,500);
   localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
   return leaderboardMode !== "online";
 }
@@ -941,7 +941,7 @@ async function renderLeaderboard(){
         orderBy("level", "desc"),
         orderBy("score", "desc"),
         orderBy("coins", "desc"),
-        limit(50)
+        limit(500)
       );
       const snap = await getDocs(q);
       const lb = snap.docs.map(d => d.data());
