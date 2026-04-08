@@ -344,10 +344,10 @@
     
   }
   @keyframes comboPop{
-    0%{transform:scale(0) rotate(-10deg); opacity:0;}
-    20%{transform:scale(1.18) rotate(4deg); opacity:1;}
-    40%{transform:scale(1) rotate(0deg); opacity:1;}
-    100%{transform:translateY(-110px) scale(1.35); opacity:0;}
+    0%{transform:translate(-50%,-50%) scale(0) rotate(-10deg); opacity:0;}
+    20%{transform:translate(-50%,-50%) scale(1.18) rotate(4deg); opacity:1;}
+    40%{transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:1;}
+    100%{transform:translate(-50%,-160%) scale(1.35); opacity:0;}
   }
   .cell{
   width:var(--tile);
@@ -1093,18 +1093,38 @@ function showLevelOverlay(){
 }
 
 
-function triggerExplosionText(kind){
-  if(kind === "small") triggerComboText("БАХ", "#ff8844");
-  else if(kind === "big") triggerComboText("БА-БАХ", "#ff4444");
+function triggerExplosionText(kind, index=null){
+  let x = null, y = null;
+  if(index !== null && els && els.grid){
+    const cell = els.grid.querySelector(`.cell[data-index="${index}"]`);
+    if(cell){
+      const r = cell.getBoundingClientRect();
+      x = r.left + r.width / 2;
+      y = r.top + r.height / 2;
+    }
+  }
+  if(kind === "small") triggerComboText("БАХ", "#ff8844", x, y);
+  else if(kind === "big") triggerComboText("БА-БАХ", "#ff4444", x, y);
 }
 
-function triggerComboText(text, color="#ffffff"){
+function triggerComboText(text, color="#ffffff", x=null, y=null){
   const el=document.getElementById("combo-text");
-  if(!el) return;
+  const layer=document.getElementById("combo-layer");
+  if(!el || !layer) return;
   el.textContent=text;
   el.style.color=color;
   el.style.textShadow=`0 0 20px ${color}`;
   el.style.animation="none";
+
+  if(x !== null && y !== null){
+    const rect = layer.getBoundingClientRect();
+    el.style.left = (x - rect.left) + "px";
+    el.style.top = (y - rect.top) + "px";
+  }else{
+    el.style.left = "50%";
+    el.style.top = "50%";
+  }
+
   void el.offsetHeight;
   el.style.animation="comboPop 1s cubic-bezier(0.17,0.89,0.32,1.28) forwards";
 }
@@ -1185,6 +1205,10 @@ async function detonateSpecialAt(center){
   const specialId=state.board[center];
   const special=SPECIAL_TILES[specialId];
   if(!special) return;
+
+  if(specialId === "beer_small") triggerExplosionText("small", center);
+  else if(specialId === "beer_big") triggerExplosionText("big", center);
+
   say("specialBoom");
   const affected=getAreaIndices(center, special.power);
   await performDirectRemove(affected,"special",0,center);
