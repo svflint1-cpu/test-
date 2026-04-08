@@ -5,15 +5,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Money Door Factory Match-3</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js">
+(function(){
+  function fitBoardToScreen(){
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const root = document.documentElement;
+    let tile;
+    if (vw <= 360) tile = 50;
+    else if (vw <= 390) tile = 54;
+    else if (vw <= 430) tile = 58;
+    else if (vw <= 480) tile = 62;
+    else tile = 72;
+    root.style.setProperty('--tile', tile + 'px');
+  }
+  fitBoardToScreen();
+  window.addEventListener('resize', fitBoardToScreen);
+})();
+
+</script>
 <style>
   :root{
     --bg1:#1d130d; --bg2:#0d0805; --panel:#342218; --panel2:#4d3425; --gold:#ffcf6e;
     --text:#fff6e9;
-    --tile:72px;
-    --gap:8px;
-    --board-pad:10px;
-    --board-border:1px;
+    --tile: clamp(52px, 13.2vw, 72px);
+    --gap: clamp(5px, 1.4vw, 8px);
+    --board-pad: clamp(8px, 2vw, 10px);
+    --board-border: 1px;
     --board-w: calc(var(--tile) * 6 + var(--gap) * 5 + var(--board-pad) * 2 + var(--board-border) * 2);
   }
   *{box-sizing:border-box}
@@ -28,7 +45,10 @@
   justify-content:center;
   padding:14px;
 }
-  .app{ width:min(100%, 470px); }
+  .app{
+  width:min(100%, calc(var(--board-w) + 28px));
+  margin:0 auto;
+}
   .title{text-align:center;font-size:28px;font-weight:900;margin:4px 0 10px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,170,80,.35)}
   .boss{position:relative;display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#5b3a25,#2f1f15);border:2px solid #8d613f;border-radius:18px;padding:10px 54px 10px 14px;min-height:88px;box-shadow:0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);margin-bottom:10px}
   .boss-avatar,.modal-avatar{border-radius:50%;background:#fff5e8;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -314,6 +334,7 @@
   .board-wrap{
   position:relative;
   width:var(--board-w);
+  max-width:100%;
   margin:0 auto;
   padding:var(--board-pad);
   border-radius:22px;
@@ -352,7 +373,7 @@
   .cell{
   width:var(--tile);
   height:var(--tile);
-  border-radius:16px;
+  border-radius:calc(var(--tile) * .24);
   background:
     linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0) 24%),
     linear-gradient(180deg,#2c221c,#120e0c);
@@ -379,8 +400,8 @@
   }
   .tile-inner{
   position:absolute;
-  inset:8px;
-  border-radius:12px;
+  inset:calc(var(--tile) * .11);
+  border-radius:calc(var(--tile) * .16);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -391,12 +412,11 @@
 }
   .cell.selected .tile-inner{transform:scale(1.1)}
   .tile-inner img{
-    width:92%;
-    height:92%;
-    object-fit:contain;
-    object-position:center;
-    
-  }
+  width:90%;
+  height:90%;
+  object-fit:contain;
+  object-position:center;
+}
   .cell.swap-moving{
     z-index:70;
     transition:transform .25s cubic-bezier(.3,1.5,.6,1), box-shadow .20s ease !important;
@@ -424,6 +444,33 @@
   .cell:hover{transform:none !important; filter:none !important}
   .boss > .pause-icon-btn:hover{transform:none !important; filter:none !important}
   button:hover{transform:none !important; filter:none !important}
+}
+
+
+@media (max-width: 560px){
+  .title{font-size:clamp(22px, 6.8vw, 30px)}
+  .boss{padding:10px 50px 10px 12px}
+  .boss-avatar{width:54px;height:54px;flex:0 0 54px}
+  .boss .label{font-size:13px}
+  .boss .line{font-size:14px}
+  .stats{gap:6px}
+  .stat{padding:7px 4px;border-radius:12px}
+  .stat .k{font-size:11px}
+  .stat .v{font-size:clamp(14px,4.5vw,18px)}
+  .controls{grid-template-columns:1fr}
+  .tool-btn{min-height:70px}
+  .combo-text{
+    font-size:clamp(30px, 9vw, 48px);
+    -webkit-text-stroke: 1.5px rgba(0,0,0,.6);
+  }
+}
+@media (max-width: 390px){
+  :root{
+    --tile: min(14.1vw, 58px);
+    --gap: 5px;
+    --board-pad: 7px;
+  }
+  .help,.credits{font-size:12px}
 }
 
 </style>
