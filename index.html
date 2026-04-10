@@ -32,6 +32,42 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 });
 
+
+
+document.getElementById("restartBtn").onclick = function(){
+  const lvl = state.level;
+  const CONTINUE_COST = 10;
+
+  if((state.coins || 0) < CONTINUE_COST){
+    setBossLine("Не хватает 10💸, бро");
+    this.innerText = "Нужно 10💸";
+    setTimeout(() => {
+      this.innerText = "Продолжить за 10💸";
+    }, 1200);
+    return;
+  }
+
+  state.coins -= CONTINUE_COST;
+  state.score = 0;
+  state.time = TIME_START;
+  state.target = getTargetForLevel(lvl);
+  state.isBusy = false;
+  state.isPaused = false;
+  state.lastLowTimeMark = false;
+  state.selected = null;
+  state.activeTool = null;
+
+  document.getElementById("gameOverOverlay").classList.remove("show");
+
+  if (typeof createRandomBoard === "function") state.board = createRandomBoard();
+  if (typeof say === "function") say("start");
+  if (typeof renderBoard === "function") renderBoard();
+  if (typeof saveGame === "function") saveGame();
+  if (typeof startTimer === "function") startTimer();
+
+  setBossLine("Продолжаем с уровня " + lvl + " за 10💸");
+};
+
 </script>
 <style>
   :root{
@@ -642,7 +678,7 @@ document.addEventListener("DOMContentLoaded", function(){
     <h3 id="gameOverTitle">Мы все проебали</h3>
     <p id="gameOverText">Смена завалена. Вот что ты успел собрать:</p>
     <p id="gameOverStats" style="font-size:18px;font-weight:700;margin-top:-4px;">Собрано дверей: 0<br>Деньги: 0<br>Уровень: 1</p>
-    <button id="restartBtn">Начать заново</button>
+    <button id="restartBtn">Продолжить за 10💸</button>
   </div>
 </div>
 
@@ -1474,9 +1510,8 @@ function showGameOverOverlay(){
   els.gameOverTitle.textContent="Мы все проебали";
   els.gameOverText.textContent="Смена завалена. Вот что ты успел собрать:";
   els.gameOverStats.innerHTML=`Собрано дверей: ${state.score}<br>Деньги: ${state.coins}<br>Уровень: ${state.level}`;
+  if(els.restartBtn) els.restartBtn.textContent = "Продолжить за 10💸";
   els.gameOverOverlay.classList.add("show");
-  const clickHandler=()=>{ els.restartBtn.removeEventListener("click",clickHandler); els.gameOverOverlay.classList.remove("show"); resetGame(); };
-  els.restartBtn.addEventListener("click", clickHandler);
 }
 function persistOnExit(){
   try{ saveGame(); }catch(e){}
@@ -1528,6 +1563,42 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const a = document.getElementById("bossAvatarIntro");
   if(a) a.src = BRIGADIER_SRC;
 });
+
+
+
+document.getElementById("restartBtn").onclick = function(){
+  const lvl = state.level;
+  const CONTINUE_COST = 10;
+
+  if((state.coins || 0) < CONTINUE_COST){
+    setBossLine("Не хватает 10💸, бро");
+    this.innerText = "Нужно 10💸";
+    setTimeout(() => {
+      this.innerText = "Продолжить за 10💸";
+    }, 1200);
+    return;
+  }
+
+  state.coins -= CONTINUE_COST;
+  state.score = 0;
+  state.time = TIME_START;
+  state.target = getTargetForLevel(lvl);
+  state.isBusy = false;
+  state.isPaused = false;
+  state.lastLowTimeMark = false;
+  state.selected = null;
+  state.activeTool = null;
+
+  document.getElementById("gameOverOverlay").classList.remove("show");
+
+  if (typeof createRandomBoard === "function") state.board = createRandomBoard();
+  if (typeof say === "function") say("start");
+  if (typeof renderBoard === "function") renderBoard();
+  if (typeof saveGame === "function") saveGame();
+  if (typeof startTimer === "function") startTimer();
+
+  setBossLine("Продолжаем с уровня " + lvl + " за 10💸");
+};
 
 </script>
 </body>
