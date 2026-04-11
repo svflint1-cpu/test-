@@ -188,21 +188,28 @@ document.addEventListener("DOMContentLoaded", function(){
     position:fixed;
     inset:0;
     display:none;
-    align-items:center;
+    align-items:flex-start;
     justify-content:center;
     background:rgba(0,0,0,.82);
     z-index:9999;
     padding:14px;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
   }
   .intro-overlay.show{display:flex}
   .intro-modal{
     width:min(100%,460px);
+    max-height:calc(100dvh - 28px);
+    overflow-y:auto;
     background:linear-gradient(180deg,#5d3f2a,#2b1c13);
     border:2px solid #a97852;
     border-radius:24px;
     box-shadow:0 18px 40px rgba(0,0,0,.45);
-    padding:20px 18px;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
     text-align:left;
+    margin:auto 0;
+    -webkit-overflow-scrolling:touch;
   }
   .intro-top{
     display:flex;
@@ -252,6 +259,8 @@ document.addEventListener("DOMContentLoaded", function(){
   .intro-rules b{color:#ffd07a}
   .intro-btn{
     width:100%;
+    position:sticky;
+    bottom:0;
     background:linear-gradient(180deg,#ffb64a,#df7f1a);
     padding:14px 20px;
     font-size:18px;
@@ -261,6 +270,7 @@ document.addEventListener("DOMContentLoaded", function(){
     font-weight:800;
     cursor:pointer;
     box-shadow:0 8px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
+    z-index:2;
   }
 
   @media (max-width:520px){:root{--tile:calc((100vw - 28px - 5 * 8px) / 6);--board-w:calc(var(--tile) * 6 + var(--gap) * 5 + var(--board-pad) * 2 + var(--board-border) * 2)}.title{font-size:24px}.boss .line{font-size:15px}.stat .v{font-size:16px}.action-grid.tools,.action-grid.shop{grid-template-columns:1fr}.action-btn{min-height:74px}}
@@ -610,7 +620,35 @@ document.addEventListener("DOMContentLoaded", function(){
     gap:8px;
     margin-bottom:12px;
   }
-  .daily-bonus-item{
+  
+  #rulesBlock{
+    margin-bottom:14px;
+  }
+
+  @media (max-width:560px){
+    .intro-overlay{
+      padding:10px;
+    }
+    .intro-modal{
+      width:100%;
+      max-height:calc(100dvh - 20px);
+      padding:16px 14px calc(16px + env(safe-area-inset-bottom));
+      border-radius:20px;
+    }
+    .intro-top{
+      align-items:flex-start;
+    }
+    .intro-avatar{
+      width:84px;
+      height:84px;
+      flex:0 0 84px;
+    }
+    .daily-door-img{
+      max-height:240px;
+    }
+  }
+
+.daily-bonus-item{
     background:rgba(255,255,255,.045);
     border:1px solid rgba(255,255,255,.08);
     border-radius:14px;
