@@ -59,6 +59,62 @@ document.addEventListener("DOMContentLoaded", function(){
   width:min(100%, calc(var(--board-w) + 28px));
   margin:0 auto;
 }
+
+html, body{
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body{
+  touch-action:manipulation;
+}
+.app{
+  contain:layout paint style;
+}
+.board-wrap{
+  overflow:hidden;
+  contain:layout paint;
+}
+.grid{
+  touch-action:none;
+  overscroll-behavior:contain;
+  contain:layout paint style;
+}
+.cell,
+.tile-inner,
+.combo-text,
+.boss,
+.stat,
+.tool-btn,
+.lb-row{
+  transform:translateZ(0);
+  will-change:transform;
+}
+.lb-toggle{
+  margin-top:10px;
+  width:100%;
+  background:linear-gradient(180deg,#6d4a33,#3e281b);
+  border:1px solid rgba(255,255,255,.1);
+}
+.lb-toggle[aria-expanded="true"]{
+  background:linear-gradient(180deg,#8b623f,#4b3121);
+}
+.lb-hidden{
+  display:none;
+}
+@media (max-width:560px){
+  body{padding:10px;}
+  .app{width:100%;}
+  .board-wrap{padding:8px;border-radius:18px;}
+  .grid{gap:5px;}
+  .cell{border-radius:14px;}
+  .tile-inner{inset:6px;}
+  .help{padding:10px;font-size:13px;}
+  .lb-row{flex-direction:column;align-items:flex-start;gap:4px;}
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation:none !important;transition:none !important;}
+}
+
   .title{text-align:center;font-size:28px;font-weight:900;margin:4px 0 10px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,170,80,.35)}
   .boss{
   position:relative;
@@ -105,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function(){
   width:calc(var(--tile) * 6 + var(--gap) * 5);
   margin:0 auto;
   user-select:none;
-  touch-action:manipulation;
+  touch-action:none;
 }
   
   
@@ -114,8 +170,16 @@ document.addEventListener("DOMContentLoaded", function(){
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-3px)}}
   
   
-  .cell.matched 
-  35%{transform:scale(1.15);opacity:1;filter:brightness(1.25)}100%{transform:scale(.18);opacity:0;filter:brightness(2)}}
+  .cell.matched{z-index:80;pointer-events:none;}
+  .cell.matched .tile-inner{
+    animation:matchPopFade .24s cubic-bezier(.2,.9,.25,1) forwards;
+    transform-origin:center center;
+  }
+  @keyframes matchPopFade{
+    0%{transform:scale(1);opacity:1;filter:brightness(1)}
+    35%{transform:scale(1.09);opacity:1;filter:brightness(1.12)}
+    100%{transform:scale(.72);opacity:0;filter:brightness(1.22)}
+  }
   .spark{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#fff7b3 0%,#ffc14d 40%,rgba(255,160,40,0) 70%);pointer-events:none;animation:fly .55s ease-out forwards;z-index:12}
   @keyframes fly{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
   .blast{position:absolute;width:74px;height:74px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,225,120,.85) 18%,rgba(255,132,48,.62) 45%,rgba(255,90,48,0) 72%);transform:translate(-50%,-50%) scale(.15);animation:blast .48s ease-out forwards;z-index:14}
@@ -167,6 +231,23 @@ document.addEventListener("DOMContentLoaded", function(){
     border:2px solid #c98b55;
     box-shadow:0 0 0 1px rgba(201,139,85,.18), 0 0 16px rgba(201,139,85,.1) inset;
     background:linear-gradient(180deg, rgba(201,139,85,.14), rgba(255,255,255,.02));
+  }
+
+  .lb-row.me{
+    border:2px solid #ffd54a;
+    box-shadow:0 0 0 1px rgba(255,213,74,.18), 0 0 18px rgba(255,213,74,.10) inset;
+    background:linear-gradient(180deg, rgba(255,213,74,.16), rgba(255,255,255,.03));
+  }
+  .me-badge{
+    display:inline-block;
+    margin-left:8px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    color:#2c1805;
+    background:linear-gradient(180deg,#ffe38a,#ffbf47);
+    vertical-align:middle;
   }
 
   .help,.credits{border-radius:14px;line-height:1.35}
@@ -498,11 +579,30 @@ document.addEventListener("DOMContentLoaded", function(){
 }
   .cell.swap-moving{
     z-index:70;
-    transition:transform .25s cubic-bezier(.3,1.5,.6,1), box-shadow .20s ease !important;
+    transition:transform .22s cubic-bezier(.22,.9,.24,1), box-shadow .18s ease !important;
     box-shadow:
       0 16px 28px rgba(0,0,0,.34),
       0 0 0 2px rgba(255,214,128,.10),
       inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .cell.dragging{
+    z-index:85;
+    transition:none !important;
+    box-shadow:
+      0 18px 30px rgba(0,0,0,.38),
+      0 0 0 2px rgba(255,214,128,.16),
+      0 0 18px rgba(255,196,90,.12),
+      inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .cell.dragging .tile-inner{
+    transform:scale(1.05);
+  }
+  .cell.drag-target{
+    transition:transform .12s ease-out, box-shadow .12s ease-out !important;
+    box-shadow:
+      0 12px 20px rgba(0,0,0,.28),
+      0 0 0 2px rgba(255,214,128,.08),
+      inset 0 1px 0 rgba(255,255,255,.05);
   }
   .cell.invalid-swap{animation:invalidNudge .24s ease;}
   @keyframes invalidNudge{
@@ -511,12 +611,18 @@ document.addEventListener("DOMContentLoaded", function(){
     45%{transform:translateX(5px)}
     70%{transform:translateX(-3px)}
   }
-  .cell.matched .tile-inner{animation:collect .26s ease-out forwards}
-  @keyframes collect{
-    0%{transform:scale(1);opacity:1;filter:brightness(1)}
-    45%{transform:scale(1.10);opacity:1;filter:brightness(1.12)}
-    100%{transform:scale(0);opacity:0;filter:brightness(1.18)}
+  .cell.fall-anim{
+    transition:transform 280ms cubic-bezier(.22,1,.36,1), opacity 180ms ease;
+    z-index:55;
   }
+  .cell.spawn-anim .tile-inner{
+    animation:spawnSettle .26s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes spawnSettle{
+    0%{transform:scale(.92);filter:brightness(1.08)}
+    100%{transform:scale(1);filter:brightness(1)}
+  }
+
 
 
 @media (hover: none){
@@ -704,8 +810,9 @@ document.addEventListener("DOMContentLoaded", function(){
   <div class="credits">Create by pokleyka :) </div>
 
   <div class="help" style="margin-top:12px">
-    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 500 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
+    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 10 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
     <div id="leaderboard" style="max-height:520px;overflow:auto;padding-right:4px"></div>
+    <button id="leaderboardToggle" class="lb-toggle" type="button" aria-expanded="false" style="margin-top:10px">Открыть весь рейтинг</button>
   </div>
 
 </div>
@@ -1005,7 +1112,7 @@ const TEXTS={boss:{
   specialBoom:["Бутылка рванула как надо.","Вот это хлопок по складу.","Спецбутылка расчистила поле."]
 },overlay:{title:"Молодец!",text:"Ты переходишь на новый уровень. Ты готов?",button:"Погнали"}};
 
-const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,isBusy:false,isPaused:false,timer:null,lastLowTimeMark:false};
+const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,isBusy:false,isPaused:false,timer:null,lastLowTimeMark:false,swipe:null,swipeSuppressClickUntil:0,dragRAF:0};
 const els={
   grid:document.getElementById("grid"), boss:document.getElementById("bossLine"), level:document.getElementById("levelValue"),
   score:document.getElementById("scoreValue"), time:document.getElementById("timeValue"), coins:document.getElementById("coinsValue"),
@@ -1016,7 +1123,7 @@ const els={
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
   gameOverOverlay:document.getElementById("gameOverOverlay"), bossAvatarGameOver:document.getElementById("bossAvatarGameOver"),
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
-  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), lbMode:document.getElementById("lbMode"), pauseBtn:document.getElementById("pauseBtn"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn")
+  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), leaderboardToggle:document.getElementById("leaderboardToggle"), lbMode:document.getElementById("lbMode"), pauseBtn:document.getElementById("pauseBtn"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn")
 };
 els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; const __introAvatar=document.getElementById("bossAvatarIntro"); if(__introAvatar) __introAvatar.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
@@ -1236,6 +1343,45 @@ async function saveLeaderboardEntry(entryOverride=null, skipRemember=false){
   return leaderboardMode !== "online";
 }
 
+let leaderboardExpanded = false;
+
+function buildLeaderboardRows(lb, currentPlayerId){
+  return lb.map((p, i) => {
+    const rank = p.rank || (i + 1);
+    const isMe = currentPlayerId && String(p.playerId || "") === String(currentPlayerId);
+    const cls = [
+      "lb-row",
+      rank === 1 ? "top1" : "",
+      rank === 2 ? "top2" : "",
+      rank === 3 ? "top3" : "",
+      isMe ? "me" : ""
+    ].filter(Boolean).join(" ");
+    const medal = rank === 1 ? "🥇 " : rank === 2 ? "🥈 " : rank === 3 ? "🥉 " : "";
+    return `<div class="${cls}">
+      <span>${medal}${rank}. ${p.name || "Игрок"}${isMe ? ' <span class="me-badge">Это ты</span>' : ''}</span>
+      <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💸 ${p.coins || 0}</span>
+    </div>`;
+  }).join("");
+}
+
+function setLeaderboardContent(lb){
+  const currentPlayerId = getPlayerId();
+  const visible = leaderboardExpanded ? lb : lb.slice(0, 10);
+
+  if(els.leaderboard){
+    els.leaderboard.innerHTML = visible.length
+      ? buildLeaderboardRows(visible, currentPlayerId)
+      : '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
+  }
+
+  if(els.leaderboardToggle){
+    const hasRest = lb.length > 10;
+    els.leaderboardToggle.style.display = hasRest ? "block" : "none";
+    els.leaderboardToggle.setAttribute("aria-expanded", String(leaderboardExpanded));
+    els.leaderboardToggle.textContent = leaderboardExpanded ? "Скрыть весь рейтинг" : "Открыть весь рейтинг";
+  }
+}
+
 async function renderLeaderboard(){
   if(!els.leaderboard) return;
   if(els.lbMode) els.lbMode.textContent = leaderboardMode === "online" ? "(онлайн)" : "(локально)";
@@ -1252,18 +1398,7 @@ async function renderLeaderboard(){
       );
       const snap = await getDocs(q);
       const lb = snap.docs.map(d => d.data());
-      if(!lb.length){
-        els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
-        return;
-      }
-      els.leaderboard.innerHTML = lb.map((p, i) => {
-        const cls = i === 0 ? "top1" : i === 1 ? "top2" : i === 2 ? "top3" : "";
-        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
-        return `<div class="lb-row ${cls}">
-          <span>${medal} ${i+1}. ${p.name || "Игрок"}</span>
-          <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💸 ${p.coins || 0}</span>
-        </div>`;
-      }).join("");
+      setLeaderboardContent(lb);
       return;
     }catch(e){
       console.error("Online read failed, using local fallback:", e);
@@ -1272,21 +1407,18 @@ async function renderLeaderboard(){
 
   let lb = [];
   try{ lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }catch(e){}
-  if(!lb.length){
-    els.leaderboard.innerHTML = '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
-    return;
-  }
-  els.leaderboard.innerHTML = lb.map((p, i) => {
-    const cls = i === 0 ? "top1" : i === 1 ? "top2" : i === 2 ? "top3" : "";
-    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
-    return `<div class="lb-row ${cls}">
-      <span>${medal} ${i+1}. ${p.name}</span>
-      <span>ур. ${p.level} · ${p.score} дверей · 💸 ${p.coins}</span>
-    </div>`;
-  }).join("");
+  setLeaderboardContent(lb);
 }
 
 
+function bindLeaderboardToggle(){
+  if(!els.leaderboardToggle || els.leaderboardToggle.dataset.bound === "1") return;
+  els.leaderboardToggle.dataset.bound = "1";
+  els.leaderboardToggle.addEventListener("click", ()=>{
+    leaderboardExpanded = !leaderboardExpanded;
+    renderLeaderboard();
+  });
+}
 
 async function watchRewardedAd(){
   if(state.isBusy) return;
@@ -1377,7 +1509,7 @@ function renderBoard(matched=new Set()){
   state.board.forEach((id,i)=>{
     const cell=document.createElement("div"); cell.className="cell cell-"+id; cell.dataset.index=i; if(state.selected===i) cell.classList.add("selected"); if(matched.has(i)) cell.classList.add("matched");
     const tile=tileById(id) || TILE_TYPES[0]; const inner=document.createElement("div"); inner.className="tile-inner"; inner.style.setProperty("--c1",tile.c1); inner.style.setProperty("--c2",tile.c2);
-    const img=document.createElement("img"); img.src=tile.src; img.alt=id; inner.appendChild(img); cell.appendChild(inner); cell.onclick=()=>onCellClick(i); els.grid.appendChild(cell);
+    const img=document.createElement("img"); img.src=tile.src; img.alt=id; inner.appendChild(img); cell.appendChild(inner); els.grid.appendChild(cell);
   });
   els.level.textContent=state.level; els.score.textContent=`${state.score}/${state.target}`; els.time.textContent=state.time; els.coins.textContent=state.coins;
   updateToolUI();
@@ -1477,10 +1609,33 @@ function getSpecialMatchPlan(groups, preferred=[]){
   for(const sp of specials) removed.delete(sp.spawnIndex);
   return {removed, specials};
 }
-function applyGravity(board){
-  for(let x=0;x<SIZE;x++){ const col=[]; for(let y=SIZE-1;y>=0;y--){ const value=board[idx(x,y)]; if(value!==null) col.push(value); }
-    for(let y=SIZE-1;y>=0;y--){ board[idx(x,y)] = col[SIZE-1-y] ?? randomType(); }
+function applyGravityWithPlan(board){
+  const moves=[];
+  for(let x=0;x<SIZE;x++){
+    const nonNull=[];
+    for(let y=SIZE-1;y>=0;y--){
+      const index=idx(x,y);
+      const value=board[index];
+      if(value!==null) nonNull.push({value, from:index});
+    }
+    let writeY=SIZE-1;
+    for(const item of nonNull){
+      const to=idx(x,writeY);
+      board[to]=item.value;
+      moves.push({from:item.from, to, steps:xy(to).y-xy(item.from).y, isSpawn:false});
+      writeY--;
+    }
+    while(writeY>=0){
+      const to=idx(x,writeY);
+      board[to]=randomType();
+      moves.push({from:null, to, steps:writeY+1, isSpawn:true});
+      writeY--;
+    }
   }
+  return moves;
+}
+function applyGravity(board){
+  return applyGravityWithPlan(board);
 }
 function hasAnyMoves(board){
   for(let i=0;i<board.length;i++){ const {x,y}=xy(i); for(const [nx,ny] of [[x+1,y],[x,y+1]]){ if(!inBounds(nx,ny)) continue; const j=idx(nx,ny); swap(board,i,j); const has=findMatches(board).length>0; swap(board,i,j); if(has) return true; } }
@@ -1563,6 +1718,43 @@ function showLineFlash(row){
   host.appendChild(flash);
   setTimeout(()=>flash.remove(),520);
 }
+function animateFalls(moves=[]){
+  if(!els.grid || !moves.length) return Promise.resolve();
+  const uniqueMoves=[];
+  const seen=new Set();
+  for(const move of moves){
+    if(seen.has(move.to)) continue;
+    seen.add(move.to);
+    uniqueMoves.push(move);
+  }
+  const tileSize=els.grid.querySelector('.cell')?.getBoundingClientRect().height || 0;
+  uniqueMoves.forEach(move=>{
+    const cell=getCellEl(move.to);
+    if(!cell) return;
+    const offsetY=-(move.steps||0)*(tileSize + parseFloat(getComputedStyle(els.grid).gap||0));
+    if(!offsetY) return;
+    cell.classList.add('fall-anim');
+    if(move.isSpawn) cell.classList.add('spawn-anim');
+    cell.style.transform=`translate3d(0, ${offsetY}px, 0)`;
+    cell.style.opacity=move.isSpawn ? '0.96' : '1';
+  });
+  void els.grid.offsetHeight;
+  uniqueMoves.forEach(move=>{
+    const cell=getCellEl(move.to);
+    if(!cell) return;
+    cell.style.transform='translate3d(0,0,0)';
+    cell.style.opacity='1';
+  });
+  return wait(300).then(()=>{
+    uniqueMoves.forEach(move=>{
+      const cell=getCellEl(move.to);
+      if(!cell) return;
+      cell.classList.remove('fall-anim','spawn-anim');
+      cell.style.transform='';
+      cell.style.opacity='';
+    });
+  });
+}
 async function resolveBoard(preferredSpecialCells=[]){
   let chain=0;
   while(true){
@@ -1579,11 +1771,13 @@ async function resolveBoard(preferredSpecialCells=[]){
     else if(chain===3) triggerComboText("ТО БИШЬ ОТЛИЧНО", "#ffd700");
     else if(chain>=4) triggerComboText("СБОРКА +3", "#ff5cff");
     playMatchSound(Math.max(count, 3));
-    matched.forEach(i=>createSparkles(i)); await wait(340);
+    matched.forEach(i=>createSparkles(i)); await wait(235);
     for(const i of plan.removed) state.board[i]=null;
     for(const sp of plan.specials) state.board[sp.spawnIndex]=sp.specialId;
-    applyGravity(state.board);
-    state.score+=count; state.coins+=Math.max(1,Math.floor(count/3)); renderBoard(); await wait(140);
+    const gravityMoves=applyGravity(state.board);
+    state.score+=count; state.coins+=Math.max(1,Math.floor(count/3)); renderBoard();
+    await animateFalls(gravityMoves);
+    await wait(70);
     preferredSpecialCells = [];
   }
   if(state.score>=state.target){ clearInterval(state.timer); await showLevelOverlay(); return; }
@@ -1623,37 +1817,33 @@ async function animateSwapMove(from,to,invalid=false){
   const dx=br.left-ar.left, dy=br.top-ar.top;
   a.classList.add("swap-moving");
   b.classList.add("swap-moving");
-  a.style.transform=`translate(${dx}px, ${dy}px)`;
-  b.style.transform=`translate(${-dx}px, ${-dy}px)`;
-  await wait(250);
-  a.style.transform="";
-  b.style.transform="";
+  a.style.transform=`translate3d(${dx}px, ${dy}px, 0)`;
+  b.style.transform=`translate3d(${-dx}px, ${-dy}px, 0)`;
+
+  if(!invalid){
+    await wait(185);
+    return;
+  }
+
+  await wait(175);
+  a.style.transform="translate3d(0,0,0)";
+  b.style.transform="translate3d(0,0,0)";
+  await wait(150);
   a.classList.remove("swap-moving");
   b.classList.remove("swap-moving");
-  if(invalid){
-    a.classList.add("invalid-swap");
-    b.classList.add("invalid-swap");
-    await wait(240);
-    a.classList.remove("invalid-swap");
-    b.classList.remove("invalid-swap");
-  }
+  a.style.transform="";
+  b.style.transform="";
+  a.classList.add("invalid-swap");
+  b.classList.add("invalid-swap");
+  await wait(220);
+  a.classList.remove("invalid-swap");
+  b.classList.remove("invalid-swap");
 }
 
-async function onCellClick(i){
+async function performMove(from,to){
   if(state.isBusy || state.isPaused) return;
-  if(state.activeTool === "bomb"){
-    bombAt(i);
-    return;
-  }
-  if(state.activeTool === "line"){
-    lineClearRow(xy(i).y);
-    return;
-  }
-  if(state.selected===null){ state.selected=i; say("select"); renderBoard(); return; }
-  if(state.selected===i){ state.selected=null; renderBoard(); return; }
-  if(!areAdjacent(state.selected,i)){ state.selected=i; say("select"); renderBoard(); return; }
+  if(!areAdjacent(from,to)) return;
 
-  const from=state.selected, to=i;
   const fromTile=state.board[from], toTile=state.board[to];
   state.isBusy=true;
 
@@ -1685,6 +1875,209 @@ async function onCellClick(i){
   await resolveBoard([from,to]);
   state.isBusy=false;
   renderBoard();
+}
+
+async function onCellClick(i){
+  if(state.isBusy || state.isPaused) return;
+  if(Date.now() < state.swipeSuppressClickUntil) return;
+  if(state.activeTool === "bomb"){
+    bombAt(i);
+    return;
+  }
+  if(state.activeTool === "line"){
+    lineClearRow(xy(i).y);
+    return;
+  }
+  if(state.selected===null){ state.selected=i; say("select"); renderBoard(); return; }
+  if(state.selected===i){ state.selected=null; renderBoard(); return; }
+  if(!areAdjacent(state.selected,i)){ state.selected=i; say("select"); renderBoard(); return; }
+  await performMove(state.selected,i);
+}
+
+function getCellIndexFromTarget(target){
+  const cell = target?.closest?.('.cell');
+  if(!cell || !els.grid.contains(cell)) return null;
+  const index = Number(cell.dataset.index);
+  return Number.isInteger(index) ? index : null;
+}
+
+function cleanupSwipeVisual(){
+  if(state.dragRAF){
+    cancelAnimationFrame(state.dragRAF);
+    state.dragRAF = 0;
+  }
+  const swipe = state.swipe;
+  if(!swipe) return;
+  if(swipe.cell){
+    swipe.cell.classList.remove("dragging");
+    swipe.cell.style.transform = "";
+  }
+  if(swipe.targetCell){
+    swipe.targetCell.classList.remove("drag-target");
+    swipe.targetCell.style.transform = "";
+  }
+}
+
+function resetSwipeState(){
+  cleanupSwipeVisual();
+  state.swipe = null;
+}
+
+function startSwipe(index, clientX, clientY, pointerId){
+  const cell = getCellEl(index);
+  state.swipe = {
+    index,
+    startX: clientX,
+    startY: clientY,
+    lastX: clientX,
+    lastY: clientY,
+    pointerId,
+    handled:false,
+    axis:null,
+    targetIndex:null,
+    cell,
+    targetCell:null
+  };
+  if(cell) cell.classList.add("dragging");
+}
+
+function updateSwipeVisual(){
+  state.dragRAF = 0;
+  const swipe = state.swipe;
+  if(!swipe || swipe.handled || !swipe.cell) return;
+
+  const dx = swipe.lastX - swipe.startX;
+  const dy = swipe.lastY - swipe.startY;
+  const tileSize = swipe.cell.getBoundingClientRect().width || 64;
+  const previewLimit = Math.min(tileSize * 0.38, 26);
+  const lockThreshold = Math.max(10, tileSize * 0.12);
+
+  let axis = swipe.axis;
+  if(!axis && Math.hypot(dx, dy) >= lockThreshold){
+    axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+    swipe.axis = axis;
+  }
+
+  if(!axis){
+    swipe.cell.style.transform = "translate(0px, 0px)";
+    return;
+  }
+
+  const offsetX = axis === "x" ? Math.max(-previewLimit, Math.min(previewLimit, dx)) : 0;
+  const offsetY = axis === "y" ? Math.max(-previewLimit, Math.min(previewLimit, dy)) : 0;
+  swipe.cell.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+  const {x, y} = xy(swipe.index);
+  const dir = axis === "x" ? (dx > 0 ? 1 : -1) : (dy > 0 ? 1 : -1);
+  const targetX = axis === "x" ? x + dir : x;
+  const targetY = axis === "y" ? y + dir : y;
+
+  const nextTargetIndex = inBounds(targetX, targetY) ? idx(targetX, targetY) : null;
+  if(nextTargetIndex !== swipe.targetIndex){
+    if(swipe.targetCell){
+      swipe.targetCell.classList.remove("drag-target");
+      swipe.targetCell.style.transform = "";
+    }
+    swipe.targetIndex = nextTargetIndex;
+    swipe.targetCell = nextTargetIndex !== null ? getCellEl(nextTargetIndex) : null;
+    if(swipe.targetCell) swipe.targetCell.classList.add("drag-target");
+  }
+
+  if(swipe.targetCell){
+    swipe.targetCell.style.transform = `translate(${(-offsetX * 0.18).toFixed(2)}px, ${(-offsetY * 0.18).toFixed(2)}px)`;
+  }
+}
+
+async function handleSwipeGesture(clientX, clientY){
+  const swipe = state.swipe;
+  if(!swipe || swipe.handled) return;
+
+  swipe.lastX = clientX;
+  swipe.lastY = clientY;
+  if(!state.dragRAF) state.dragRAF = requestAnimationFrame(updateSwipeVisual);
+
+  const dx = clientX - swipe.startX;
+  const dy = clientY - swipe.startY;
+  const distance = Math.hypot(dx, dy);
+  const threshold = 22;
+  if(distance < threshold) return;
+
+  const axis = swipe.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
+  swipe.axis = axis;
+  swipe.handled = true;
+  state.swipeSuppressClickUntil = Date.now() + 250;
+
+  if(state.activeTool === "bomb" || state.activeTool === "line"){
+    cleanupSwipeVisual();
+    await onCellClick(swipe.index);
+    resetSwipeState();
+    return;
+  }
+
+  const from = swipe.index;
+  const {x, y} = xy(from);
+  const targetX = axis === "x" ? x + (dx > 0 ? 1 : -1) : x;
+  const targetY = axis === "y" ? y + (dy > 0 ? 1 : -1) : y;
+
+  if(!inBounds(targetX, targetY)){
+    if(swipe.cell){
+      swipe.cell.style.transition = "transform .16s ease-out";
+      swipe.cell.style.transform = "translate(0px,0px)";
+      setTimeout(()=>{ if(swipe.cell) swipe.cell.style.transition = ""; }, 180);
+    }
+    if(swipe.targetCell){
+      swipe.targetCell.style.transition = "transform .16s ease-out";
+      swipe.targetCell.style.transform = "translate(0px,0px)";
+      setTimeout(()=>{ if(swipe.targetCell) swipe.targetCell.style.transition = ""; }, 180);
+    }
+    setTimeout(resetSwipeState, 170);
+    return;
+  }
+
+  cleanupSwipeVisual();
+  state.selected = null;
+  renderBoard();
+  await performMove(from, idx(targetX, targetY));
+  resetSwipeState();
+}
+
+function bindSwipeControls(){
+  if(!els.grid || els.grid.dataset.swipeBound === "1") return;
+  els.grid.dataset.swipeBound = "1";
+
+  els.grid.addEventListener("pointerdown", (e)=>{
+    if(state.isBusy || state.isPaused) return;
+    const index = getCellIndexFromTarget(e.target);
+    if(index === null) return;
+    startSwipe(index, e.clientX, e.clientY, e.pointerId);
+    try{ els.grid.setPointerCapture(e.pointerId); }catch(_){}
+  }, {passive:true});
+
+  els.grid.addEventListener("pointermove", (e)=>{
+    if(!state.swipe || state.swipe.pointerId !== e.pointerId) return;
+    e.preventDefault();
+    handleSwipeGesture(e.clientX, e.clientY);
+  }, {passive:false});
+
+  els.grid.addEventListener("pointerup", async (e)=>{
+    const swipe = state.swipe;
+    if(!swipe || swipe.pointerId !== e.pointerId) return;
+    const index = swipe.index;
+    const handled = swipe.handled;
+    resetSwipeState();
+    try{ els.grid.releasePointerCapture(e.pointerId); }catch(_){}
+    if(!handled) await onCellClick(index);
+  });
+
+  els.grid.addEventListener("pointercancel", (e)=>{
+    if(state.swipe && state.swipe.pointerId === e.pointerId) resetSwipeState();
+    try{ els.grid.releasePointerCapture(e.pointerId); }catch(_){}
+  });
+
+  els.grid.addEventListener("pointerleave", (e)=>{
+    if(!state.swipe || state.swipe.pointerId !== e.pointerId) return;
+    handleSwipeGesture(e.clientX, e.clientY);
+  });
 }
 async function detonateSpecialAt(center){
   const specialId=state.board[center];
@@ -1856,6 +2249,8 @@ async function init(){
   els.lineBtn.onclick=()=>toggleTool("line");
   els.timeBtn.onclick=buyTime;
   if(els.pauseBtn) els.pauseBtn.onclick=()=> state.isPaused ? resumeGame() : pauseGame();
+  bindSwipeControls();
+bindLeaderboardToggle();
   if(els.buyBombBtn) els.buyBombBtn.onclick=buyBomb; if(els.buyLineBtn) els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
   updateToolUI();
   if(window.Telegram?.WebApp){ try{ Telegram.WebApp.ready(); }catch{} }
