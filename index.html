@@ -67,6 +67,10 @@ html, body{
 body{
   touch-action:manipulation;
 }
+body.pause-scroll{
+  touch-action:auto;
+  overscroll-behavior:auto;
+}
 .app{
   contain:layout paint style;
 }
@@ -449,6 +453,12 @@ body{
   }
   .board-paused{
     filter:saturate(.88) brightness(.92);
+    pointer-events:none !important;
+    touch-action:auto !important;
+  }
+  body.pause-scroll .grid,
+  body.pause-scroll .board-wrap{
+    touch-action:auto !important;
   }
 
 
@@ -2135,26 +2145,30 @@ function buyLine(){ if(state.isBusy || state.isPaused) return; if(state.coins<LI
 function pauseGame(){
   if(state.isPaused) return;
   state.isPaused = true;
+  resetSwipeState();
   if(els.pauseBtn){
     els.pauseBtn.classList.add("paused");
     els.pauseBtn.textContent = "▶";
     els.pauseBtn.setAttribute("aria-label","Продолжить");
     els.pauseBtn.setAttribute("title","Продолжить");
   }
+  if(document.body) document.body.classList.add("pause-scroll");
   if(els.grid) els.grid.classList.add("board-paused");
-  if(els.toolHint) els.toolHint.textContent = "Пауза включена: время стоит, поле заблокировано.";
+  if(els.toolHint) els.toolHint.textContent = "Пауза включена: время стоит, поле не реагирует, страницу можно листать.";
   saveGame();
 }
 
 function resumeGame(){
   if(!state.isPaused) return;
   state.isPaused = false;
+  resetSwipeState();
   if(els.pauseBtn){
     els.pauseBtn.classList.remove("paused");
     els.pauseBtn.textContent = "⏸";
     els.pauseBtn.setAttribute("aria-label","Пауза");
     els.pauseBtn.setAttribute("title","Пауза");
   }
+  if(document.body) document.body.classList.remove("pause-scroll");
   if(els.grid) els.grid.classList.remove("board-paused");
   if(els.toolHint) els.toolHint.textContent = "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
   saveGame();
