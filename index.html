@@ -208,6 +208,7 @@ body.pause-scroll{
   .btn-line{background:linear-gradient(180deg,#65b6ff,#2d67de)}
   .btn-time{background:linear-gradient(180deg,#ffbe56,#de7f18)}
   .btn-pause{background:linear-gradient(180deg,#7a7a7a,#383838)}
+  .btn-kostyak{background:linear-gradient(180deg,#f4c85f,#b67a11)}
   .reward-btn{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:72px;background:linear-gradient(180deg,#8d61e9,#5b34a8) !important;border:1px solid rgba(255,255,255,.12)}
   .reward-btn .btn-sub{font-size:13px}
   .action-hint{margin-top:0;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:13px;line-height:1.35;color:#ffe7c5}
@@ -254,6 +255,14 @@ body.pause-scroll{
     vertical-align:middle;
   }
 
+
+  .kostyak-section{margin-top:12px;padding:12px;border-radius:16px;background:linear-gradient(180deg,rgba(255,215,120,.12),rgba(255,255,255,.03));border:1px solid rgba(255,215,120,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 18px rgba(0,0,0,.14)}
+  .kostyak-title{display:flex;align-items:center;gap:8px;font-weight:900;color:#ffe5a3;margin-bottom:8px}
+  .kostyak-sub{font-size:12px;opacity:.85;margin-bottom:8px;color:#fff0cf}
+  .kostyak-list{display:grid;gap:8px}
+  .lb-row.kostyak{border:2px solid rgba(255,215,90,.65);box-shadow:0 0 0 1px rgba(255,215,90,.18),0 0 18px rgba(255,215,90,.12) inset;background:linear-gradient(180deg, rgba(255,215,90,.16), rgba(255,255,255,.03))}
+  .cup-glow{display:inline-block;margin-left:6px;filter:drop-shadow(0 0 6px rgba(255,214,90,.55));animation:cupBounce 1.2s ease-in-out infinite}
+  @keyframes cupBounce{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-1px) scale(1.05)}50%{transform:translateY(-3px) scale(1.12)}75%{transform:translateY(-1px) scale(1.06)}}
   .help,.credits{border-radius:14px;line-height:1.35}
   .help{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:10px 12px;margin-top:10px;font-size:14px}
   .credits{opacity:.8;font-size:12px;margin-top:10px}
@@ -774,6 +783,74 @@ body.pause-scroll{
     line-height:1.35;
   }
 
+
+
+  .board-wrap.milestone-gold{
+    animation:milestoneGlow 1.1s ease-in-out infinite;
+    box-shadow:0 0 0 2px rgba(255,212,92,.34), 0 0 28px rgba(255,203,84,.34), 0 18px 38px rgba(255,188,68,.26), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .board-wrap.milestone-gold .grid{
+    animation:goldBoardFloat 1.2s ease-in-out infinite;
+  }
+  .board-wrap.milestone-gold .cell{
+    animation:goldDoorPulse .9s ease-in-out infinite;
+    border-color:rgba(255,223,138,.48);
+    box-shadow:0 0 0 1px rgba(255,225,150,.20), 0 0 16px rgba(255,198,84,.20), 0 4px 10px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .board-wrap.milestone-gold .tile-inner{
+    box-shadow:0 0 0 1px rgba(255,240,180,.24), 0 0 22px rgba(255,210,100,.40), inset 0 0 22px rgba(255,224,148,.24);
+    filter:saturate(1.35) brightness(1.18) contrast(1.06);
+  }
+  .board-wrap.milestone-gold .cell::after{
+    content:"";position:absolute;inset:-8px;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(circle, rgba(255,223,130,.26) 0%, rgba(255,198,84,0) 72%);
+    animation:goldHalo 1.2s ease-in-out infinite;
+  }
+  .board-wrap.milestone-gold .cell:nth-child(odd) .tile-inner,
+  .board-wrap.milestone-gold .cell:nth-child(3n) .tile-inner,
+  .board-wrap.milestone-gold .cell:nth-child(4n) .tile-inner{
+    animation:goldShine .95s linear infinite;
+  }
+  @keyframes goldDoorPulse{
+    0%,100%{transform:translateY(0) scale(1);}
+    50%{transform:translateY(-3px) scale(1.07);}
+  }
+  @keyframes goldBoardFloat{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.012);}
+  }
+  @keyframes goldHalo{
+    0%,100%{opacity:.38;transform:scale(.92);}
+    50%{opacity:.78;transform:scale(1.08);}
+  }
+  @keyframes goldShine{
+    0%{filter:saturate(1.18) brightness(1.08) contrast(1.04)}
+    50%{filter:saturate(1.48) brightness(1.34) contrast(1.08)}
+    100%{filter:saturate(1.18) brightness(1.08) contrast(1.04)}
+  }
+  @keyframes milestoneGlow{
+    0%,100%{box-shadow:0 0 0 2px rgba(255,212,92,.28), 0 0 28px rgba(255,203,84,.24), 0 18px 38px rgba(255,188,68,.22), inset 0 1px 0 rgba(255,255,255,.05);}
+    50%{box-shadow:0 0 0 2px rgba(255,232,160,.46), 0 0 40px rgba(255,215,110,.38), 0 24px 48px rgba(255,200,74,.34), inset 0 1px 0 rgba(255,255,255,.08);}
+  }
+
+
+  .btn-auto{background:linear-gradient(180deg,#8e6bff,#5332b8)}
+  .milestone-overlay{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;background:rgba(10,6,2,.52);backdrop-filter:blur(2px);z-index:10000;padding:14px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .milestone-overlay.show{display:flex}
+  .milestone-modal{width:min(100%,460px);max-height:calc(100dvh - 28px);overflow-y:auto;background:linear-gradient(180deg,#6a4922,#2d1b0c);border:2px solid #d3a04d;border-radius:24px;box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 26px rgba(255,194,74,.18);padding:20px 18px calc(20px + env(safe-area-inset-bottom));text-align:left;margin:auto 0}
+  .milestone-title{font-size:32px;font-weight:900;color:#ffd56f;line-height:1;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+  .milestone-sub{font-size:16px;color:#ffe8c4;line-height:1.35;margin-bottom:14px}
+  .milestone-card{background:linear-gradient(180deg,rgba(255,225,140,.12),rgba(255,255,255,.04));border:1px solid rgba(255,214,122,.28);border-radius:20px;padding:14px 14px 16px;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+  .milestone-badge-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .milestone-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(255,196,90,.18);color:#ffd891;font-weight:900;font-size:13px}
+  .milestone-count{color:#fff0cc;font-size:13px;opacity:.92;font-weight:800}
+  .milestone-hero{font-family:'Bangers', cursive;font-size:48px;line-height:1;color:#fff1bf;text-shadow:0 3px 0 #55340e,0 0 18px rgba(255,205,96,.22);letter-spacing:2px;text-align:center;margin:8px 0 12px}
+  .milestone-text{font-size:18px;line-height:1.45;color:#fff2d4;text-align:center;white-space:pre-line}
+  .milestone-box{display:grid;gap:8px;margin-bottom:12px}
+  .milestone-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:10px 12px;color:#ffe9cb;font-size:14px;line-height:1.35}
+  .milestone-btn{width:100%;position:sticky;bottom:0;background:linear-gradient(180deg,#ffcb61,#df871a);padding:14px 20px;font-size:18px;border:none;border-radius:16px;color:white;font-weight:800;cursor:pointer;box-shadow:0 8px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);z-index:2}
+  @media (max-width:560px){.milestone-overlay{padding:10px}.milestone-modal{width:100%;max-height:calc(100dvh - 20px);padding:16px 14px calc(16px + env(safe-area-inset-bottom));border-radius:20px}.milestone-title{font-size:28px}.milestone-hero{font-size:40px}}
+
 </style>
 </head>
 <body>
@@ -820,7 +897,12 @@ body.pause-scroll{
   <div class="credits">Create by pokleyka :) </div>
 
   <div class="help" style="margin-top:12px">
-    <div style="font-weight:800;margin-bottom:8px">🏆 Топ 10 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
+    <div class="kostyak-section">
+      <div class="kostyak-title">🏆 Костяки</div>
+      <div class="kostyak-sub">Игроки, которые набрали 8000+ дверей и держат цех на плечах.</div>
+      <div id="kostyakLeaderboard" class="kostyak-list"></div>
+    </div>
+    <div style="font-weight:800;margin:12px 0 8px">🏆 Топ 10 игроков <span id="lbMode" style="opacity:.7;font-size:12px"></span></div>
     <div id="leaderboard" style="max-height:520px;overflow:auto;padding-right:4px"></div>
     <button id="leaderboardToggle" class="lb-toggle" type="button" aria-expanded="false" style="margin-top:10px">Открыть весь рейтинг</button>
   </div>
@@ -863,6 +945,35 @@ body.pause-scroll{
   </div>
 </div>
 
+<div class="milestone-overlay" id="milestoneOverlay">
+  <div class="milestone-modal">
+    <div class="intro-top">
+      <div class="intro-avatar"><img id="bossAvatarMilestone" alt="Бригадир"></div>
+      <div>
+        <div class="milestone-title">Костяк</div>
+        <div class="milestone-sub" id="milestoneSub">Бригадир остановил смену. Тут уже не просто похвала — это статус.</div>
+      </div>
+    </div>
+
+    <div class="milestone-card">
+      <div class="milestone-badge-row">
+        <span class="milestone-badge">🏆 ДОСТИЖЕНИЕ</span>
+        <span class="milestone-count">8000 дверей</span>
+      </div>
+      <div class="milestone-hero">ТЫ КОСТЯК</div>
+      <div class="milestone-text" id="milestoneText">Ты красава, мы собрали 8000 дверей. Теперь ты не просто Игрок — ты костяк!</div>
+    </div>
+
+    <div class="milestone-box">
+      <div class="milestone-item" id="milestoneApplause">👏 Цех аплодирует стоя</div>
+      <div class="milestone-item" id="milestoneGoldText">✨ Золотая анимация дверей включена</div>
+      <div class="milestone-item" id="milestoneBrigadier">🧠 Бригадир: «Вот это уже уровень. Таких людей цех держит возле себя.»</div>
+    </div>
+
+    <button class="milestone-btn" id="milestoneContinueBtn" type="button" onclick="startFromMilestone()">Дальше работать</button>
+  </div>
+</div>
+
 <div class="overlay" id="levelOverlay">
   <div class="modal">
     <div class="modal-avatar"><img id="bossAvatarBig" alt="Бригадир"></div>
@@ -898,6 +1009,7 @@ function setBossLine(text){
 }
 
 const STORAGE_KEY="door_factory_save_v6_special_beer", BACKUP_STORAGE_KEY=STORAGE_KEY+"_backup", SIZE=6, TARGET_START=15, TIME_START=60, BOMB_COST=10, LINE_COST=12, TIME_COST=8, REWARDED_COINS=50;
+const SECRET_AUTOPLAY_TAPS = 5, SECRET_AUTOPLAY_WINDOW_MS = 2200;
 function getTargetForLevel(level){
   let total = 15;
   for(let i = 2; i <= level; i++){
@@ -1049,6 +1161,7 @@ function applyDailyRewardIfNeeded(){
 }
 
 function prepareDailyIntro(){
+  state.overlayMode = "daily";
   const dayIndex = getDailyDoorIndex();
   const experienced = isExperiencedPlayer();
   const dailyRewardState = applyDailyRewardIfNeeded();
@@ -1122,20 +1235,20 @@ const TEXTS={boss:{
   specialBoom:["Бутылка рванула как надо.","Вот это хлопок по складу.","Спецбутылка расчистила поле."]
 },overlay:{title:"Молодец!",text:"Ты переходишь на новый уровень. Ты готов?",button:"Погнали"}};
 
-const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,isBusy:false,isPaused:false,timer:null,lastLowTimeMark:false,swipe:null,swipeSuppressClickUntil:0,dragRAF:0};
+const state={board:[],selected:null,score:0,level:1,target:TARGET_START,time:TIME_START,coins:0,isBusy:false,isPaused:false,timer:null,lastLowTimeMark:false,swipe:null,swipeSuppressClickUntil:0,dragRAF:0,reached8000:false,overlayMode:"daily",milestonePendingLevelUp:false,autoPlay:false,autoPlayTimer:null,autoPlayBusy:false};
 const els={
   grid:document.getElementById("grid"), boss:document.getElementById("bossLine"), level:document.getElementById("levelValue"),
   score:document.getElementById("scoreValue"), time:document.getElementById("timeValue"), coins:document.getElementById("coinsValue"),
-  bombBtn:document.getElementById("bombBtn"), lineBtn:document.getElementById("lineBtn"), timeBtn:document.getElementById("timeBtn"), pauseBtn:document.getElementById("pauseBtn"),
+  bombBtn:document.getElementById("bombBtn"), lineBtn:document.getElementById("lineBtn"), timeBtn:document.getElementById("timeBtn"), pauseBtn:document.getElementById("pauseBtn"), jump8000Btn:document.getElementById("jump8000Btn"),
   buyBombBtn:document.getElementById("buyBombBtn"), buyLineBtn:document.getElementById("buyLineBtn"), rewardBtn:document.getElementById("rewardBtn"),
   overlay:document.getElementById("levelOverlay"), overlayTitle:document.getElementById("overlayTitle"),
   overlayText:document.getElementById("overlayText"), goBtn:document.getElementById("goBtn"),
   bossAvatarSmall:document.getElementById("bossAvatarSmall"), bossAvatarBig:document.getElementById("bossAvatarBig"),
   gameOverOverlay:document.getElementById("gameOverOverlay"), bossAvatarGameOver:document.getElementById("bossAvatarGameOver"),
   gameOverTitle:document.getElementById("gameOverTitle"), gameOverText:document.getElementById("gameOverText"),
-  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), leaderboardToggle:document.getElementById("leaderboardToggle"), lbMode:document.getElementById("lbMode"), pauseBtn:document.getElementById("pauseBtn"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn")
+  gameOverStats:document.getElementById("gameOverStats"), restartBtn:document.getElementById("restartBtn"), leaderboard:document.getElementById("leaderboard"), kostyakLeaderboard:document.getElementById("kostyakLeaderboard"), leaderboardToggle:document.getElementById("leaderboardToggle"), lbMode:document.getElementById("lbMode"), pauseBtn:document.getElementById("pauseBtn"), pauseOverlay:document.getElementById("pauseOverlay"), resumeBtn:document.getElementById("resumeBtn"), autoPlayBtn:document.getElementById("autoPlayBtn"), autoPlayState:document.getElementById("autoPlayState")
 };
-els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; const __introAvatar=document.getElementById("bossAvatarIntro"); if(__introAvatar) __introAvatar.src=BRIGADIER_SRC;
+els.bossAvatarSmall.src=BRIGADIER_SRC; els.bossAvatarBig.src=BRIGADIER_SRC; els.bossAvatarGameOver.src=BRIGADIER_SRC; const __introAvatar=document.getElementById("bossAvatarIntro"); if(__introAvatar) __introAvatar.src=BRIGADIER_SRC; const __milestoneAvatar=document.getElementById("bossAvatarMilestone"); if(__milestoneAvatar) __milestoneAvatar.src=BRIGADIER_SRC;
 els.overlayTitle.textContent=TEXTS.overlay.title; els.overlayText.textContent=TEXTS.overlay.text; els.goBtn.textContent=TEXTS.overlay.button;
 
 const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
@@ -1158,7 +1271,152 @@ const randomType=(level=(state?.level||1))=>{
 const isSpecialTile=id=>!!SPECIAL_TILES[id];
 const tileById=id=>SPECIAL_TILES[id] || TILE_TYPES.find(t=>t.id===id);
 
+function findAutoPlayableMove(board=state.board){
+  for(let i=0;i<board.length;i++){
+    const {x,y}=xy(i);
+    for(const [nx,ny] of [[x+1,y],[x,y+1]]){
+      if(!inBounds(nx,ny)) continue;
+      const j=idx(nx,ny);
+      swap(board,i,j);
+      const hasMatch=findMatches(board).length>0;
+      swap(board,i,j);
+      if(hasMatch) return [i,j];
+    }
+  }
+  return null;
+}
 
+function handleBossSecretTap(){
+  const now = Date.now();
+  if(!state.secretTap){
+    state.secretTap = { count: 0, startedAt: 0, timer: null };
+  }
+  const tap = state.secretTap;
+  if(!tap.startedAt || now - tap.startedAt > SECRET_AUTOPLAY_WINDOW_MS){
+    tap.count = 0;
+    tap.startedAt = now;
+  }
+  tap.count += 1;
+  const left = Math.max(SECRET_AUTOPLAY_TAPS - tap.count, 0);
+  if(tap.timer) clearTimeout(tap.timer);
+  tap.timer = setTimeout(() => {
+    if(state.secretTap){
+      state.secretTap.count = 0;
+      state.secretTap.startedAt = 0;
+      state.secretTap.timer = null;
+    }
+    if(!state.autoPlay && !state.isPaused && !document.getElementById("milestoneOverlay")?.classList.contains("show")){
+      setBossLine("Бригадир смотрит. Обычная смена продолжается.");
+    }
+  }, SECRET_AUTOPLAY_WINDOW_MS);
+
+  if(tap.count >= SECRET_AUTOPLAY_TAPS){
+    clearTimeout(tap.timer);
+    tap.count = 0;
+    tap.startedAt = 0;
+    tap.timer = null;
+    toggleAutoPlay();
+    return;
+  }
+
+  setBossLine(`Секрет бригадира: ещё ${left} ${left === 1 ? "тап" : left < 5 ? "тапа" : "тапов"}.`);
+}
+
+function setAutoPlayEnabled(enabled){
+  const next = !!enabled;
+  if(state.autoPlay === next) return;
+  state.autoPlay = next;
+  if(els.bossAvatarSmall){
+    els.bossAvatarSmall.style.cursor = "pointer";
+    els.bossAvatarSmall.style.filter = next ? "drop-shadow(0 0 10px rgba(255,215,90,.9))" : "";
+  }
+  if(els.autoPlayBtn) els.autoPlayBtn.classList.toggle("active", next);
+  if(els.autoPlayState) els.autoPlayState.textContent = next ? "ON" : "OFF";
+  if(next){
+    setBossLine("Бригадир включил автозавод. Игра сама хуячит ходы.");
+    kickAutoPlayLoop();
+  }else{
+    if(state.autoPlayTimer){
+      clearTimeout(state.autoPlayTimer);
+      state.autoPlayTimer = null;
+    }
+    state.autoPlayBusy = false;
+    setBossLine("Автозавод выключен. Дальше руками, бро.");
+  }
+}
+
+function toggleAutoPlay(){
+  setAutoPlayEnabled(!state.autoPlay);
+}
+
+function scheduleAutoPlay(delay=220){
+  if(state.autoPlayTimer) clearTimeout(state.autoPlayTimer);
+  if(!state.autoPlay) return;
+  state.autoPlayTimer = setTimeout(kickAutoPlayLoop, delay);
+}
+
+async function kickAutoPlayLoop(){
+  if(!state.autoPlay || state.autoPlayBusy) return;
+  state.autoPlayBusy = true;
+  try{
+    if(document.getElementById("milestoneOverlay")?.classList.contains("show")){
+      await wait(1800);
+      await startFromMilestone();
+      return;
+    }
+    if(document.getElementById("introOverlay")?.classList.contains("show")){
+      await startFromIntro();
+      return;
+    }
+    if(els.overlay?.classList.contains("show")){
+      els.goBtn?.click();
+      return;
+    }
+    if(els.gameOverOverlay?.classList.contains("show")){
+      if((state.coins||0) >= 10) els.restartBtn?.click();
+      else setAutoPlayEnabled(false);
+      return;
+    }
+    if(state.isPaused){
+      resumeGame();
+      return;
+    }
+    if(state.isBusy) return;
+
+    if(state.time <= 7 && state.coins >= TIME_COST){
+      buyTime();
+      return;
+    }
+
+    if(state.coins >= LINE_COST && state.time <= 5){
+      lineClearRow(Math.floor(Math.random() * SIZE));
+      return;
+    }
+
+    if(state.coins >= BOMB_COST && state.time <= 4){
+      bombAt(Math.floor(Math.random() * (SIZE * SIZE)));
+      return;
+    }
+
+    const move = findAutoPlayableMove();
+    if(move){
+      await performMove(move[0], move[1]);
+      return;
+    }
+
+    if(!hasPossibleMove(state.board)){
+      say("shuffle");
+      state.board = createRandomBoard();
+      renderBoard();
+      saveGame();
+    }
+  }catch(e){
+    console.error("autoplay error", e);
+  }finally{
+    state.autoPlayBusy = false;
+    scheduleAutoPlay(state.autoPlay ? 240 : 0);
+  }
+}
 
 const LEADERBOARD_KEY="door_factory_leaderboard_v1";
 const PENDING_ONLINE_SCORE_KEY="door_factory_pending_online_score_v1";
@@ -1212,6 +1470,52 @@ function playLineSound(){
   setTimeout(()=>playTone(820, 0.11, "triangle", 0.03, 1200), 45);
 }
 
+function playApplauseSound(){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+    if(!window.__doorAudioCtx) window.__doorAudioCtx = new AudioCtx();
+    const ctx = window.__doorAudioCtx;
+    const now = ctx.currentTime;
+
+    for(let i=0;i<14;i++){
+      const start = now + i * 0.085;
+      const duration = 0.05 + Math.random() * 0.03;
+      const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * duration)), ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let j=0;j<data.length;j++) data[j] = (Math.random() * 2 - 1) * (1 - j / data.length);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const band = ctx.createBiquadFilter();
+      band.type = "bandpass";
+      band.frequency.value = 1400 + Math.random() * 1200;
+      band.Q.value = 0.8;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.linearRampToValueAtTime(0.06 + Math.random() * 0.02, start + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      src.connect(band);
+      band.connect(gain);
+      gain.connect(ctx.destination);
+      src.start(start);
+      src.stop(start + duration);
+    }
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(640, now);
+    osc.frequency.linearRampToValueAtTime(880, now + 0.22);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.028, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.48);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.5);
+  }catch(e){}
+}
+
 function getPlayerName(){
   try{
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -1220,6 +1524,64 @@ function getPlayerName(){
     }
   }catch(e){}
   return "Игрок";
+}
+
+function setMilestoneGold(active){
+  const wrap = document.querySelector('.board-wrap');
+  if(!wrap) return;
+  wrap.classList.toggle('milestone-gold', !!active);
+}
+
+function show8000Milestone(){
+  const milestoneOverlay = document.getElementById("milestoneOverlay");
+  const milestoneText = document.getElementById("milestoneText");
+  const milestoneSub = document.getElementById("milestoneSub");
+  const milestoneApplause = document.getElementById("milestoneApplause");
+  const milestoneGoldText = document.getElementById("milestoneGoldText");
+  const milestoneBrigadier = document.getElementById("milestoneBrigadier");
+  const playerName = getPlayerName();
+
+  state.overlayMode = "milestone8000";
+  state.isPaused = true;
+  if(milestoneSub) milestoneSub.textContent = "Бригадир остановил смену. Тут уже не просто похвала — это статус.";
+  if(milestoneText) milestoneText.textContent = `Ты красава, мы собрали 8000 дверей.
+Теперь ты не просто ${playerName} — ты КОСТЯК!`;
+  if(milestoneApplause) milestoneApplause.textContent = "👏 Цех аплодирует стоя";
+  if(milestoneGoldText) milestoneGoldText.textContent = "✨ Все двери на поле светятся и пульсируют";
+  if(milestoneBrigadier) milestoneBrigadier.textContent = "🧠 Бригадир: «Вот это уже уровень. Таких людей цех держит возле себя.»";
+
+  setMilestoneGold(true);
+  playApplauseSound();
+  if(milestoneOverlay) milestoneOverlay.classList.add("show");
+}
+
+function trigger8000MilestoneFromButton(){
+  if(state.isBusy) return;
+  const introOverlay = document.getElementById("introOverlay");
+  const milestoneOverlay = document.getElementById("milestoneOverlay");
+  if(introOverlay) introOverlay.classList.remove("show");
+  if(milestoneOverlay?.classList.contains("show")) return;
+  clearInterval(state.timer);
+  state.timer = null;
+  state.isPaused = true;
+  state.activeTool = null;
+  state.selected = null;
+  if(state.score < 8000) state.score = 8000;
+  state.reached8000 = true;
+  state.milestonePendingLevelUp = false;
+  renderBoard();
+  show8000Milestone();
+  saveGame();
+}
+
+async function maybeShow8000Milestone(){
+  if(state.reached8000 || state.score < 8000) return false;
+  state.reached8000 = true;
+  clearInterval(state.timer);
+  state.timer = null;
+  saveGame();
+  show8000Milestone();
+  return true;
 }
 
 function getPlayerId(){
@@ -1355,20 +1717,24 @@ async function saveLeaderboardEntry(entryOverride=null, skipRemember=false){
 
 let leaderboardExpanded = false;
 
-function buildLeaderboardRows(lb, currentPlayerId){
+function buildLeaderboardRows(lb, currentPlayerId, mode="main"){
   return lb.map((p, i) => {
     const rank = p.rank || (i + 1);
     const isMe = currentPlayerId && String(p.playerId || "") === String(currentPlayerId);
+    const isKostyak = (p.score || 0) >= 8000;
     const cls = [
       "lb-row",
       rank === 1 ? "top1" : "",
       rank === 2 ? "top2" : "",
       rank === 3 ? "top3" : "",
-      isMe ? "me" : ""
+      isMe ? "me" : "",
+      isKostyak ? "kostyak" : ""
     ].filter(Boolean).join(" ");
-    const medal = rank === 1 ? "🥇 " : rank === 2 ? "🥈 " : rank === 3 ? "🥉 " : "";
+    const medal = mode === "kostyak" ? "" : rank === 1 ? "🥇 " : rank === 2 ? "🥈 " : rank === 3 ? "🥉 " : "";
+    const cup = isKostyak ? '<span class="cup-glow">🏆</span>' : "";
+    const label = mode === "kostyak" ? `Костяк #${i + 1}` : `${medal}${rank}.`;
     return `<div class="${cls}">
-      <span>${medal}${rank}. ${p.name || "Игрок"}${isMe ? ' <span class="me-badge">Это ты</span>' : ''}</span>
+      <span>${label} ${p.name || "Игрок"}${cup}${isMe ? ' <span class="me-badge">Это ты</span>' : ''}</span>
       <span>ур. ${p.level || 0} · ${p.score || 0} дверей · 💸 ${p.coins || 0}</span>
     </div>`;
   }).join("");
@@ -1376,14 +1742,25 @@ function buildLeaderboardRows(lb, currentPlayerId){
 
 function setLeaderboardContent(lb){
   const currentPlayerId = getPlayerId();
+  const kostyaki = lb.filter(p => (p.score || 0) >= 8000)
+    .sort((a,b)=>(b.score - a.score) || (b.level - a.level) || (b.coins - a.coins))
+    .slice(0, 25);
   const visible = leaderboardExpanded ? lb : lb.slice(0, 10);
+
+  if(els.kostyakLeaderboard){
+    els.kostyakLeaderboard.innerHTML = kostyaki.length
+      ? buildLeaderboardRows(kostyaki, currentPlayerId, "kostyak")
+      : '<div style="opacity:.82">Пока пусто. Первый костяк ещё не оформился.</div>';
+  }
 
   if(els.leaderboard){
     els.leaderboard.innerHTML = visible.length
-      ? buildLeaderboardRows(visible, currentPlayerId)
+      ? buildLeaderboardRows(visible, currentPlayerId, "main")
       : '<div style="opacity:.8">Пока пусто. Сыграй первую смену.</div>';
   }
 
+  if(els.autoPlayState) els.autoPlayState.textContent = state.autoPlay ? "ON" : "OFF";
+  if(els.autoPlayBtn) els.autoPlayBtn.classList.toggle("active", !!state.autoPlay);
   if(els.leaderboardToggle){
     const hasRest = lb.length > 10;
     els.leaderboardToggle.style.display = hasRest ? "block" : "none";
@@ -1464,6 +1841,7 @@ function saveGame(){
     time: state.time,
     coins: state.coins,
     lastLowTimeMark: state.lastLowTimeMark,
+    reached8000: state.reached8000,
     savedAt: Date.now()
   };
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
@@ -1483,8 +1861,11 @@ function restoreStateFromData(d){
   state.time = Math.max(1, Number(d.time) || TIME_START);
   state.coins = Math.max(0, Number(d.coins) || 0);
   state.lastLowTimeMark = !!d.lastLowTimeMark;
+  state.reached8000 = !!d.reached8000 || (state.score >= 8000);
   state.activeTool = null;
   state.isPaused = false;
+  state.overlayMode = "daily";
+  state.milestonePendingLevelUp = false;
 
   if(!hasAnyMoves(state.board)){
     state.board = createRandomBoard();
@@ -1523,6 +1904,7 @@ function renderBoard(matched=new Set()){
   });
   els.level.textContent=state.level; els.score.textContent=`${state.score}/${state.target}`; els.time.textContent=state.time; els.coins.textContent=state.coins;
   updateToolUI();
+  setMilestoneGold(false);
   saveGame();
   Promise.resolve(renderLeaderboard());
 }
@@ -1790,7 +2172,14 @@ async function resolveBoard(preferredSpecialCells=[]){
     await wait(70);
     preferredSpecialCells = [];
   }
-  if(state.score>=state.target){ clearInterval(state.timer); await showLevelOverlay(); return; }
+  const needsLevelUp = state.score >= state.target;
+  if(needsLevelUp) clearInterval(state.timer);
+  const showedMilestone = await maybeShow8000Milestone();
+  if(showedMilestone){
+    state.milestonePendingLevelUp = needsLevelUp;
+    return;
+  }
+  if(needsLevelUp){ await showLevelOverlay(); return; }
   if(!hasAnyMoves(state.board)) shuffleBoard();
 }
 function showLevelOverlay(){
@@ -2154,7 +2543,7 @@ function pauseGame(){
   }
   if(document.body) document.body.classList.add("pause-scroll");
   if(els.grid) els.grid.classList.add("board-paused");
-  if(els.toolHint) els.toolHint.textContent = "Пауза включена: время стоит, поле не реагирует, страницу можно листать.";
+  if(els.toolHint) els.toolHint.textContent = state.autoPlay ? "Автозавод поставил паузу. Можно листать страницу." : "Пауза включена: время стоит, поле не реагирует, страницу можно листать.";
   saveGame();
 }
 
@@ -2170,8 +2559,9 @@ function resumeGame(){
   }
   if(document.body) document.body.classList.remove("pause-scroll");
   if(els.grid) els.grid.classList.remove("board-paused");
-  if(els.toolHint) els.toolHint.textContent = "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
+  if(els.toolHint) els.toolHint.textContent = state.autoPlay ? "Автозавод активен: бригадир сам двигает двери и жмёт нужные кнопки." : "Подсказка: жми на усиление снизу, потом тыкай по полю. На кнопке сразу показана цена.";
   saveGame();
+  if(state.autoPlay) scheduleAutoPlay(120);
 }
 
 function startTimer(){
@@ -2233,19 +2623,43 @@ function persistOnExit(){
 function resetGame(){
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
   try{ localStorage.removeItem(BACKUP_STORAGE_KEY); }catch(e){}
-  state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.isBusy=false; state.isPaused=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.board=createRandomBoard(); saveGame(); prepareDailyIntro();
+  setAutoPlayEnabled(false);
+  state.score=0; state.level=1; state.target=getTargetForLevel(1); state.time=TIME_START; state.coins=0; state.isBusy=false; state.isPaused=false; state.lastLowTimeMark=false; state.selected=null; state.activeTool=null; state.reached8000=false; state.overlayMode="daily"; state.milestonePendingLevelUp=false; state.board=createRandomBoard(); setMilestoneGold(false); saveGame(); prepareDailyIntro();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
-function startFromIntro(){
+async function startFromMilestone(){
+  const overlay = document.getElementById("milestoneOverlay");
+  if(overlay) overlay.classList.remove("show");
+
+  if(state.overlayMode === "milestone8000"){
+    const pendingLevelUp = !!state.milestonePendingLevelUp;
+    state.milestonePendingLevelUp = false;
+    state.overlayMode = "daily";
+    state.isPaused = false;
+    setMilestoneGold(false);
+    saveGame();
+    renderBoard();
+    if(pendingLevelUp){
+      await showLevelOverlay();
+    }else{
+      say("start");
+      startTimer();
+    }
+  }
+}
+
+async function startFromIntro(){
   const overlay = document.getElementById("introOverlay");
   if(overlay) overlay.classList.remove("show");
+
   state.isPaused = false;
   markExperienced();
   saveGame();
   say("start");
   renderBoard();
   startTimer();
+  if(state.autoPlay) scheduleAutoPlay(120);
 }
 
 async function init(){
@@ -2263,6 +2677,10 @@ async function init(){
   els.lineBtn.onclick=()=>toggleTool("line");
   els.timeBtn.onclick=buyTime;
   if(els.pauseBtn) els.pauseBtn.onclick=()=> state.isPaused ? resumeGame() : pauseGame();
+  if(els.bossAvatarSmall){
+    els.bossAvatarSmall.setAttribute("title","Секрет бригадира: 5 тапов");
+    els.bossAvatarSmall.addEventListener("click", handleBossSecretTap);
+  }
   bindSwipeControls();
 bindLeaderboardToggle();
   if(els.buyBombBtn) els.buyBombBtn.onclick=buyBomb; if(els.buyLineBtn) els.buyLineBtn.onclick=buyLine; els.rewardBtn.onclick=watchRewardedAd;
